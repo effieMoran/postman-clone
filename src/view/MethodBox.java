@@ -3,28 +3,18 @@ package view;
 import javax.swing.*;
 import java.awt.*;
 
-public class UrlPanel extends JPanel {
-    private JTextField urlField;
+public class MethodBox extends JPanel {
     private JComboBox<String> methodBox;
 
-    public UrlPanel() {
+    public MethodBox() {
         setLayout(new BorderLayout());
 
-        urlField = new JTextField();
         String[] methods = {"GET", "POST", "PUT", "DELETE"};
         methodBox = new JComboBox<>(methods);
-
-        add(new JLabel("URL: "), BorderLayout.WEST);
-        add(urlField, BorderLayout.CENTER);
-        add(methodBox, BorderLayout.EAST);
-    }
-
-    public String getUrl() {
-        return urlField.getText();
+        add(methodBox, BorderLayout.CENTER);
     }
 
     public String getMethod() {
         return (String) methodBox.getSelectedItem();
     }
 }
-
