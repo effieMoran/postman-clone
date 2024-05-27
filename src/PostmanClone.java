@@ -22,8 +22,12 @@ public class PostmanClone extends JFrame {
 
     private HttpClient httpClient;
 
+    private HttpRequestFactory httpRequestFactory;
+
+
     public PostmanClone() {
         httpClient = HttpClients.createDefault();
+        httpRequestFactory = new HttpRequestFactory();
 
         setTitle("Postman Clone");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -81,58 +85,16 @@ public class PostmanClone extends JFrame {
         String headers = headersArea.getText();
         String requestBody = requestBodyArea.getText();
 
-        //TODO: Replace this with a factory method
         try {
-            HttpRequestBase request;
-            switch (method) {
-                case "GET":
-                    request = new HttpGet(url);
-                    break;
-                case "POST":
-                    HttpPost postRequest = new HttpPost(url);
-                    postRequest.setEntity(new StringEntity(requestBody));
-                    request = postRequest;
-                    break;
-                case "PUT":
-                    HttpPut putRequest = new HttpPut(url);
-                    putRequest.setEntity(new StringEntity(requestBody));
-                    request = putRequest;
-                    break;
-                case "DELETE":
-                    request = new HttpDelete(url);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid method: " + method);
-            }
-
-            // Add headers
-            if (!headers.isEmpty()) {
-                String[] headerLines = headers.split("\n");
-                for (String headerLine : headerLines) {
-                    String[] parts = headerLine.split(":", 2);
-                    if (parts.length == 2) {
-                        request.addHeader(parts[0].trim(), parts[1].trim());
-                    }
-                }
-            }
-
-            // Execute the request
-            HttpResponse response = httpClient.execute(request);
-
-            // Get response body
-            HttpEntity entity = response.getEntity();
-            String responseBody = EntityUtils.toString(entity);
+            HttpRequestBase request = httpRequestFactory.createRequest(method, url, requestBody);
+            httpRequestFactory.addHeaders(request, headers);
+            String responseBody = httpRequestFactory.executeRequest(request);
             responseTextArea.setText(responseBody);
-
-            // Handle other response properties like status code, etc.
-            // You can add more detailed response handling here if needed.
-
         } catch (IOException e) {
             e.printStackTrace();
             responseTextArea.setText("Error: " + e.getMessage());
         }
     }
-
     private void addCollection() {
         // Placeholder method for adding collections
         JOptionPane.showMessageDialog(this, "Collection Added!");
