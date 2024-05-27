@@ -17,6 +17,8 @@ public class PostmanClone extends JFrame {
     private JTextArea requestBodyArea;
     private JTextArea responseTextArea;
     private JButton sendButton;
+    private JButton saveButton;
+    private JPanel collectionsPanel;
 
     private HttpClient httpClient;
 
@@ -41,7 +43,14 @@ public class PostmanClone extends JFrame {
         responseTextArea = new JTextArea(15, 50);
         responseTextArea.setEditable(false);
         sendButton = new JButton("Send");
+        saveButton = new JButton("Save");
         sendButton.addActionListener(e -> sendRequest());
+
+        // Initialize collections panel
+        collectionsPanel = new JPanel(new BorderLayout());
+        JButton addCollectionButton = new JButton("+");
+        addCollectionButton.addActionListener(e -> addCollection());
+        collectionsPanel.add(addCollectionButton, BorderLayout.NORTH);
     }
 
     private void addComponentsToFrame() {
@@ -49,11 +58,12 @@ public class PostmanClone extends JFrame {
         container.setLayout(new BorderLayout());
 
         JPanel topPanel = new JPanel(new FlowLayout());
-        topPanel.add(new JLabel("URL:"));
-        topPanel.add(urlField);
         topPanel.add(new JLabel("Method:"));
         topPanel.add(methodComboBox);
+        topPanel.add(new JLabel("URL:"));
+        topPanel.add(urlField);
         topPanel.add(sendButton);
+        topPanel.add(saveButton);
         container.add(topPanel, BorderLayout.NORTH);
 
         JPanel centerPanel = new JPanel(new GridLayout(3, 1));
@@ -61,6 +71,8 @@ public class PostmanClone extends JFrame {
         centerPanel.add(new JScrollPane(requestBodyArea));
         centerPanel.add(new JScrollPane(responseTextArea));
         container.add(centerPanel, BorderLayout.CENTER);
+
+        container.add(collectionsPanel, BorderLayout.WEST);
     }
 
     private void sendRequest() {
@@ -119,6 +131,11 @@ public class PostmanClone extends JFrame {
             e.printStackTrace();
             responseTextArea.setText("Error: " + e.getMessage());
         }
+    }
+
+    private void addCollection() {
+        // Placeholder method for adding collections
+        JOptionPane.showMessageDialog(this, "Collection Added!");
     }
 
     public static void main(String[] args) {
