@@ -1,10 +1,6 @@
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,9 +17,7 @@ public class PostmanClone extends JFrame {
     private JPanel collectionsPanel;
 
     private HttpClient httpClient;
-
     private HttpRequestFactory httpRequestFactory;
-
 
     public PostmanClone() {
         httpClient = HttpClients.createDefault();
@@ -70,10 +64,28 @@ public class PostmanClone extends JFrame {
         topPanel.add(saveButton);
         container.add(topPanel, BorderLayout.NORTH);
 
-        JPanel centerPanel = new JPanel(new GridLayout(3, 1));
-        centerPanel.add(new JScrollPane(headersArea));
-        centerPanel.add(new JScrollPane(requestBodyArea));
-        centerPanel.add(new JScrollPane(responseTextArea));
+        JPanel centerPanel = new JPanel(new BorderLayout());
+
+        JPanel headersPanel = new JPanel(new BorderLayout());
+        headersPanel.add(new JLabel("Headers:"), BorderLayout.NORTH);
+        headersPanel.add(new JScrollPane(headersArea), BorderLayout.CENTER);
+
+        JPanel requestBodyPanel = new JPanel(new BorderLayout());
+        requestBodyPanel.add(new JLabel("Body:"), BorderLayout.NORTH);
+        requestBodyPanel.add(new JScrollPane(requestBodyArea), BorderLayout.CENTER);
+
+        JPanel requestPanel = new JPanel(new GridLayout(2, 1));
+        requestPanel.add(headersPanel);
+        requestPanel.add(requestBodyPanel);
+
+        centerPanel.add(requestPanel, BorderLayout.NORTH);
+
+        JPanel responsePanel = new JPanel(new BorderLayout());
+        responsePanel.add(new JLabel("Response:"), BorderLayout.NORTH);
+        responsePanel.add(new JScrollPane(responseTextArea), BorderLayout.CENTER);
+
+        centerPanel.add(responsePanel, BorderLayout.CENTER);
+
         container.add(centerPanel, BorderLayout.CENTER);
 
         container.add(collectionsPanel, BorderLayout.WEST);
@@ -95,6 +107,7 @@ public class PostmanClone extends JFrame {
             responseTextArea.setText("Error: " + e.getMessage());
         }
     }
+
     private void addCollection() {
         // Placeholder method for adding collections
         JOptionPane.showMessageDialog(this, "Collection Added!");
