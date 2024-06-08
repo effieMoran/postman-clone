@@ -11,6 +11,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.util.List;
+import javax.swing.*;
+import java.awt.*;
+import java.io.IOException;
 
 public class PostmanClone extends JFrame {
     private JTextField urlField;
@@ -60,6 +63,8 @@ public class PostmanClone extends JFrame {
         JButton addCollectionButton = new JButton("+");
         addCollectionButton.addActionListener(e -> addCollection());
         collectionsPanel.add(addCollectionButton, BorderLayout.NORTH);
+
+        loadSavedRequests();
     }
 
     private void addComponentsToFrame() {
@@ -129,6 +134,13 @@ public class PostmanClone extends JFrame {
         requestDAO.saveRequest(request);
         collectionsListModel.addElement(request);
         JOptionPane.showMessageDialog(this, "Request Saved!");
+    }
+
+    private void loadSavedRequests() {
+        List<RequestDAO.Request> requests = requestDAO.getAllRequests();
+        for (RequestDAO.Request request : requests) {
+            collectionsListModel.addElement(request);
+        }
     }
 
     private void addCollection() {

@@ -1,19 +1,40 @@
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class RequestDAO {
 
-    private List<Request> requests;
+    private MongoClient mongoClient;
+    private MongoDatabase database;
+    private MongoCollection<Document> collection;
 
     public RequestDAO() {
-        this.requests = new ArrayList<>();
+        mongoClient = new MongoClient("localhost", 27017);
+        database = mongoClient.getDatabase("postman_clone");
+        collection = database.getCollection("requests");
     }
 
     public void saveRequest(Request request) {
-        requests.add(request);
+        Document doc = new Document("method", request.getMethod())
+                .append("url", request.getUrl())
+                .append("headers", request.getHeaders())
+                .append("body", request.getBody());
+        collection.insertOne(doc);
     }
 
     public List<Request> getAllRequests() {
+        List<Request> requests = new ArrayList<>();
+        for (Document doc : collection.find()) {
+            requests.add(new Request(
+                    doc.getString("method"),
+                    doc.getString("url"),
+                    doc.getString("headers"),
+                    doc.getString("body")));
+        }
         return requests;
     }
 
@@ -30,7 +51,7 @@ public class RequestDAO {
             this.body = body;
         }
 
-        // Getters and setters
+        // Getters
         public String getMethod() {
             return method;
         }
@@ -45,6 +66,11 @@ public class RequestDAO {
 
         public String getBody() {
             return body;
+        }
+
+        @Override
+        public String toString() {
+            return method + " " + url;
         }
     }
 }
