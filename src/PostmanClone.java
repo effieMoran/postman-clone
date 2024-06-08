@@ -1,6 +1,9 @@
 import org.apache.http.client.methods.HttpRequestBase;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,9 +23,14 @@ public class PostmanClone extends JFrame {
     private JList<String> folderList;
     private DefaultListModel<String> folderListModel;
     private Map<String, DefaultListModel<RequestDAO.Request>> folderRequestMap;
+    private JTree folderTree; // Changed to JTree
+    private DefaultTreeModel treeModel;
+    private DefaultMutableTreeNode root;
+    private Map<String, DefaultMutableTreeNode> folderNodeMap;
 
     private HTTPService httpService;
     private RequestDAO requestDAO;
+
 
     public PostmanClone() {
         httpService = new HTTPService();
@@ -141,21 +149,45 @@ public class PostmanClone extends JFrame {
         RequestDAO.Request request = new RequestDAO.Request(method, url, headers, body);
         requestDAO.saveRequest(request);
 
-        String selectedFolder = folderList.getSelectedValue();
+        String selectedFolder = getSelectedFolder();
         if (selectedFolder != null) {
-            DefaultListModel<RequestDAO.Request> requestListModel = folderRequestMap.get(selectedFolder);
-            if (requestListModel != null) {
-                requestListModel.addElement(request);
+            DefaultMutableTreeNode folderNode = folderNodeMap.get(selectedFolder);
+            if (folderNode != null) {
+                DefaultListModel<RequestDAO.Request> requestListModel = folderRequestMap.get(selectedFolder);
+                if (requestListModel != null) {
+                    requestListModel.addElement(request);
+                }
+                treeModel.reload(folderNode);
             }
         }
         JOptionPane.showMessageDialog(this, "Request Saved!");
     }
 
+    private String getSelectedFolder() {
+        TreePath path = folderTree.getSelectionPath();
+        if (path != null) {
+            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+            return selectedNode.getUserObject().toString();
+        }
+        return null;
+    }
     private void addFolder(String folderName) {
+        if (root == null) {
+            root = new DefaultMutableTreeNode("Root");
+            treeModel = new DefaultTreeModel(root);
+            folderNodeMap = new HashMap<>();
+            folderTree = new JTree(treeModel); // Initialize folderTree
+            collectionsPanel.add(new JScrollPane(folderTree), BorderLayout.CENTER); // Add folderTree to the collectionsPanel
+        }
+
+        DefaultMutableTreeNode folderNode = new DefaultMutableTreeNode(folderName);
+        root.add(folderNode);
+        folderNodeMap.put(folderName, folderNode);
         DefaultListModel<RequestDAO.Request> requestListModel = new DefaultListModel<>();
         folderRequestMap.put(folderName, requestListModel);
-        folderListModel.addElement(folderName);
+        treeModel.reload();
     }
+
 
     private void addCollection() {
         String collectionName = JOptionPane.showInputDialog(this, "Enter Collection Name:");
