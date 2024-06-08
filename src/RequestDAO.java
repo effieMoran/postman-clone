@@ -18,27 +18,31 @@ public class RequestDAO {
         collection = database.getCollection("requests");
     }
 
-    public void saveRequest(Request request) {
+    public void saveRequest(Request request, String folderName) {
         Document doc = new Document("method", request.getMethod())
                 .append("url", request.getUrl())
                 .append("headers", request.getHeaders())
-                .append("body", request.getBody());
+                .append("body", request.getBody())
+                .append("folder", folderName); // Include folder information
         collection.insertOne(doc);
     }
 
     public List<Request> getAllRequests() {
         List<Request> requests = new ArrayList<>();
         for (Document doc : collection.find()) {
-            requests.add(new Request(
+            Request request = new Request(
                     doc.getString("method"),
                     doc.getString("url"),
                     doc.getString("headers"),
-                    doc.getString("body")));
+                    doc.getString("body"));
+            // Set folder information
+            request.setFolder(doc.getString("folder"));
+            requests.add(request);
         }
         return requests;
     }
 
-      public static class Request {
+    public static class Request {
             private String method;
             private String url;
             private String headers;

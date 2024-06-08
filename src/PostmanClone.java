@@ -152,12 +152,12 @@ public class PostmanClone extends JFrame {
         // Set folder to "Recents" if not selected
         if (selectedFolder == null) {
             selectedFolder = "Recents";
-        } else {
             // Clear selection to ensure the "Recents" folder is selected in UI
             folderTree.clearSelection();
         }
 
-        requestDAO.saveRequest(request);
+        // Save the request with the selected folder name
+        requestDAO.saveRequest(request, selectedFolder);
 
         // Update UI and show message
         updateFolderTree(selectedFolder, request);
@@ -165,14 +165,28 @@ public class PostmanClone extends JFrame {
     }
 
     private void updateFolderTree(String folderName, RequestDAO.Request request) {
-        DefaultMutableTreeNode folderNode = folderNodeMap.get(folderName);
-        if (folderNode != null) {
-            DefaultListModel<RequestDAO.Request> requestListModel = folderRequestMap.get(folderName);
-            if (requestListModel != null && request != null) {
-                requestListModel.addElement(request);
+        DefaultMutableTreeNode folderNode;
+
+        // If folder is "Recents", get its node; otherwise, create the "Recents" folder node
+        if (folderName.equals("Recents")) {
+            folderNode = folderNodeMap.get("Root");
+        } else {
+            folderNode = folderNodeMap.get("Recents");
+            // If "Recents" folder doesn't exist, create it
+            if (folderNode == null) {
+                addFolder("Recents");
+                folderNode = folderNodeMap.get("Recents");
             }
-            treeModel.reload(folderNode);
         }
+
+        // Create a node for the request
+        DefaultMutableTreeNode requestNode = new DefaultMutableTreeNode(request.getMethod() + ": " + request.getUrl());
+
+        // Add request node to folder node
+        folderNode.add(requestNode);
+
+        // Update the tree model
+        treeModel.reload(folderNode);
     }
 
     private String getSelectedFolder() {
@@ -197,8 +211,9 @@ public class PostmanClone extends JFrame {
         folderNodeMap.put(folderName, folderNode);
         DefaultListModel<RequestDAO.Request> requestListModel = new DefaultListModel<>();
         folderRequestMap.put(folderName, requestListModel);
-        treeModel.reload();
+        treeModel.reload(root); // Reload the root node to update the tree
     }
+
 
 
     private void addCollection() {
