@@ -6,7 +6,7 @@ sino que se debe utilizar una librería. La más común es apache-commons-http.
 
 ### Funcionalidad básica:
 
-- [ ] Poder escribir una url y ejecutar métodos GET, POST, PUT, DELETE contra ella. Los
+- [x] Poder escribir una url y ejecutar métodos GET, POST, PUT, DELETE contra ella. Los
 parámetros de la url (querystring) se ingresan manualmente en la url (ej.
 servicor.com?a=123&b=xyz).
 - [ ] Caja de texto o lista para adicionar headers de ser necesario. Uno por renglón.
@@ -16,7 +16,7 @@ servicor.com?a=123&b=xyz).
 precargar al ser seleccionados.
 
 ### Adicionales:
-
+ 
 - [ ] Hacer del ingreso de headers una grilla.
 - [ ] Poder adicionar parámetros de querystring en una tabla de claves-valores
 dedicada a ello, similar a la de los headers, con una grilla.

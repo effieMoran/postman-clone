@@ -1,9 +1,16 @@
 import org.apache.http.client.methods.*;
-import org.apache.http.impl.client.HttpClients;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import javax.swing.*;
+import java.awt.*;
+import java.io.IOException;
+import java.util.List;
+import javax.swing.*;
+import java.awt.*;
+import java.io.IOException;
+import java.util.List;
 
 public class PostmanClone extends JFrame {
     private JTextField urlField;
@@ -14,11 +21,14 @@ public class PostmanClone extends JFrame {
     private JButton sendButton;
     private JButton saveButton;
     private JPanel collectionsPanel;
+    private DefaultListModel<RequestDAO.Request> collectionsListModel;
 
     private HTTPService httpService;
+    private RequestDAO requestDAO;
 
     public PostmanClone() {
         httpService = new HTTPService();
+        requestDAO = new RequestDAO();
 
         setTitle("Postman Clone");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -31,7 +41,7 @@ public class PostmanClone extends JFrame {
     }
 
     private void initComponents() {
-        urlField = new JTextField(40);
+        urlField = new JTextField("http://google.com", 40);
         methodComboBox = new JComboBox<>(new String[]{"GET", "POST", "PUT", "DELETE"});
         headersArea = new JTextArea(5, 30);
         requestBodyArea = new JTextArea(10, 30);
@@ -40,9 +50,13 @@ public class PostmanClone extends JFrame {
         sendButton = new JButton("Send");
         saveButton = new JButton("Save");
         sendButton.addActionListener(e -> sendRequest());
+        saveButton.addActionListener(e -> saveRequest());
 
         // Initialize collections panel
         collectionsPanel = new JPanel(new BorderLayout());
+        collectionsListModel = new DefaultListModel<>();
+        JList<RequestDAO.Request> collectionsList = new JList<>(collectionsListModel);
+        collectionsPanel.add(new JScrollPane(collectionsList), BorderLayout.CENTER);
         JButton addCollectionButton = new JButton("+");
         addCollectionButton.addActionListener(e -> addCollection());
         collectionsPanel.add(addCollectionButton, BorderLayout.NORTH);
@@ -103,6 +117,18 @@ public class PostmanClone extends JFrame {
             e.printStackTrace();
             responseTextArea.setText("Error: " + e.getMessage());
         }
+    }
+
+    private void saveRequest() {
+        String method = (String) methodComboBox.getSelectedItem();
+        String url = urlField.getText();
+        String headers = headersArea.getText();
+        String body = requestBodyArea.getText();
+
+        RequestDAO.Request request = new RequestDAO.Request(method, url, headers, body);
+        requestDAO.saveRequest(request);
+        collectionsListModel.addElement(request);
+        JOptionPane.showMessageDialog(this, "Request Saved!");
     }
 
     private void addCollection() {
