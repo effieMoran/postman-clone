@@ -1,19 +1,11 @@
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.HttpRequestBase;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import javax.swing.*;
-import java.awt.*;
-import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
-import javax.swing.*;
-import java.awt.*;
-import java.io.IOException;
-import java.util.List;
-import javax.swing.*;
-import java.awt.*;
-import java.io.IOException;
+import java.util.Map;
 
 public class PostmanClone extends JFrame {
     private JTextField urlField;
@@ -23,8 +15,11 @@ public class PostmanClone extends JFrame {
     private JTextArea responseTextArea;
     private JButton sendButton;
     private JButton saveButton;
+    private JButton addCollectionButton;
     private JPanel collectionsPanel;
-    private DefaultListModel<RequestDAO.Request> collectionsListModel;
+    private JList<String> folderList;
+    private DefaultListModel<String> folderListModel;
+    private Map<String, DefaultListModel<RequestDAO.Request>> folderRequestMap;
 
     private HTTPService httpService;
     private RequestDAO requestDAO;
@@ -32,6 +27,7 @@ public class PostmanClone extends JFrame {
     public PostmanClone() {
         httpService = new HTTPService();
         requestDAO = new RequestDAO();
+        folderRequestMap = new HashMap<>();
 
         setTitle("Postman Clone");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -39,6 +35,7 @@ public class PostmanClone extends JFrame {
 
         initComponents();
         addComponentsToFrame();
+        loadSavedRequests();
 
         setVisible(true);
     }
@@ -52,19 +49,30 @@ public class PostmanClone extends JFrame {
         responseTextArea.setEditable(false);
         sendButton = new JButton("Send");
         saveButton = new JButton("Save");
+        addCollectionButton = new JButton("Add Collection");
         sendButton.addActionListener(e -> sendRequest());
         saveButton.addActionListener(e -> saveRequest());
-
-        // Initialize collections panel
-        collectionsPanel = new JPanel(new BorderLayout());
-        collectionsListModel = new DefaultListModel<>();
-        JList<RequestDAO.Request> collectionsList = new JList<>(collectionsListModel);
-        collectionsPanel.add(new JScrollPane(collectionsList), BorderLayout.CENTER);
-        JButton addCollectionButton = new JButton("+");
         addCollectionButton.addActionListener(e -> addCollection());
-        collectionsPanel.add(addCollectionButton, BorderLayout.NORTH);
 
-        loadSavedRequests();
+        collectionsPanel = new JPanel(new BorderLayout());
+
+        folderListModel = new DefaultListModel<>();
+        folderList = new JList<>(folderListModel);
+        folderList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        folderList.addListSelectionListener(e -> {
+            String selectedFolder = folderList.getSelectedValue();
+            if (selectedFolder != null) {
+                JList<RequestDAO.Request> requestList = new JList<>(folderRequestMap.get(selectedFolder));
+                JScrollPane scrollPane = new JScrollPane(requestList);
+                collectionsPanel.add(scrollPane, BorderLayout.CENTER);
+                collectionsPanel.revalidate();
+                collectionsPanel.repaint();
+            }
+        });
+
+        JScrollPane folderScrollPane = new JScrollPane(folderList);
+        collectionsPanel.add(addCollectionButton, BorderLayout.NORTH);
+        collectionsPanel.add(folderScrollPane, BorderLayout.CENTER);
     }
 
     private void addComponentsToFrame() {
@@ -132,20 +140,40 @@ public class PostmanClone extends JFrame {
 
         RequestDAO.Request request = new RequestDAO.Request(method, url, headers, body);
         requestDAO.saveRequest(request);
-        collectionsListModel.addElement(request);
+
+        String selectedFolder = folderList.getSelectedValue();
+        if (selectedFolder != null) {
+            DefaultListModel<RequestDAO.Request> requestListModel = folderRequestMap.get(selectedFolder);
+            if (requestListModel != null) {
+                requestListModel.addElement(request);
+            }
+        }
         JOptionPane.showMessageDialog(this, "Request Saved!");
     }
 
-    private void loadSavedRequests() {
-        List<RequestDAO.Request> requests = requestDAO.getAllRequests();
-        for (RequestDAO.Request request : requests) {
-            collectionsListModel.addElement(request);
-        }
+    private void addFolder(String folderName) {
+        DefaultListModel<RequestDAO.Request> requestListModel = new DefaultListModel<>();
+        folderRequestMap.put(folderName, requestListModel);
+        folderListModel.addElement(folderName);
     }
 
     private void addCollection() {
-        // Placeholder method for adding collections
-        JOptionPane.showMessageDialog(this, "Collection Added!");
+        String collectionName = JOptionPane.showInputDialog(this, "Enter Collection Name:");
+        if (collectionName != null && !collectionName.isEmpty()) {
+            addFolder(collectionName);
+        }
+    }
+
+    private void loadSavedRequests() {
+        addFolder("Recents"); // Add the default "Recents" folder
+
+        List<RequestDAO.Request> requests = requestDAO.getAllRequests();
+        for (RequestDAO.Request request : requests) {
+            DefaultListModel<RequestDAO.Request> recentRequestsModel = folderRequestMap.get("Recents");
+            if (recentRequestsModel != null) {
+                recentRequestsModel.addElement(request);
+            }
+        }
     }
 
     public static void main(String[] args) {
