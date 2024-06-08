@@ -146,21 +146,33 @@ public class PostmanClone extends JFrame {
         String headers = headersArea.getText();
         String body = requestBodyArea.getText();
 
+        String selectedFolder = getSelectedFolder();
         RequestDAO.Request request = new RequestDAO.Request(method, url, headers, body);
+
+        // Set folder to "Recents" if not selected
+        if (selectedFolder == null) {
+            selectedFolder = "Recents";
+        } else {
+            // Clear selection to ensure the "Recents" folder is selected in UI
+            folderTree.clearSelection();
+        }
+
         requestDAO.saveRequest(request);
 
-        String selectedFolder = getSelectedFolder();
-        if (selectedFolder != null) {
-            DefaultMutableTreeNode folderNode = folderNodeMap.get(selectedFolder);
-            if (folderNode != null) {
-                DefaultListModel<RequestDAO.Request> requestListModel = folderRequestMap.get(selectedFolder);
-                if (requestListModel != null) {
-                    requestListModel.addElement(request);
-                }
-                treeModel.reload(folderNode);
-            }
-        }
+        // Update UI and show message
+        updateFolderTree(selectedFolder, request);
         JOptionPane.showMessageDialog(this, "Request Saved!");
+    }
+
+    private void updateFolderTree(String folderName, RequestDAO.Request request) {
+        DefaultMutableTreeNode folderNode = folderNodeMap.get(folderName);
+        if (folderNode != null) {
+            DefaultListModel<RequestDAO.Request> requestListModel = folderRequestMap.get(folderName);
+            if (requestListModel != null && request != null) {
+                requestListModel.addElement(request);
+            }
+            treeModel.reload(folderNode);
+        }
     }
 
     private String getSelectedFolder() {
@@ -201,10 +213,26 @@ public class PostmanClone extends JFrame {
 
         List<RequestDAO.Request> requests = requestDAO.getAllRequests();
         for (RequestDAO.Request request : requests) {
-            DefaultListModel<RequestDAO.Request> recentRequestsModel = folderRequestMap.get("Recents");
-            if (recentRequestsModel != null) {
-                recentRequestsModel.addElement(request);
+            DefaultMutableTreeNode folderNode = root; // Default to root folder
+            String folderName = "Recents"; // Default folder name
+
+            // If the request has a specific folder assigned, use it
+            if (request.getFolder() != null && !request.getFolder().isEmpty()) {
+                folderName = request.getFolder();
+                folderNode = folderNodeMap.get(folderName);
+                if (folderNode == null) {
+                    // If the folder doesn't exist, create it
+                    addFolder(folderName);
+                    folderNode = folderNodeMap.get(folderName);
+                }
             }
+
+            // Create a node for the request
+            DefaultMutableTreeNode requestNode = new DefaultMutableTreeNode(request.getMethod() + ": " + request.getUrl());
+            folderNode.add(requestNode);
+
+            // Update the tree model
+            treeModel.reload(folderNode);
         }
     }
 

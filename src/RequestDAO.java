@@ -38,39 +38,46 @@ public class RequestDAO {
         return requests;
     }
 
-    public static class Request {
-        private String method;
-        private String url;
-        private String headers;
-        private String body;
+      public static class Request {
+            private String method;
+            private String url;
+            private String headers;
+            private String body;
+            private String folder; // Add folder field
 
-        public Request(String method, String url, String headers, String body) {
-            this.method = method;
-            this.url = url;
-            this.headers = headers;
-            this.body = body;
+            public Request(String method, String url, String headers, String body) {
+                this.method = method;
+                this.url = url;
+                this.headers = headers;
+                this.body = body;
+            }
+
+            // Getter and setter methods for folder
+            public String getFolder() {
+                return folder;
+            }
+
+            public void setFolder(String folder) {
+                this.folder = folder;
+            }
+
+            // Getter methods for other fields
+            public String getMethod() {
+                return method;
+            }
+
+            public String getUrl() {
+                return url;
+            }
+
+            public String getHeaders() {
+                return headers;
+            }
+
+            public String getBody() {
+                return body;
+            }
         }
 
-        // Getters
-        public String getMethod() {
-            return method;
-        }
 
-        public String getUrl() {
-            return url;
-        }
-
-        public String getHeaders() {
-            return headers;
-        }
-
-        public String getBody() {
-            return body;
-        }
-
-        @Override
-        public String toString() {
-            return method + " " + url;
-        }
-    }
 }
