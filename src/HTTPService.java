@@ -8,11 +8,11 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 
-public class HttpRequestFactory {
+public class HTTPService {
 
     private HttpClient httpClient;
 
-    public HttpRequestFactory() {
+    public HTTPService() {
         this.httpClient = HttpClients.createDefault();
     }
 
@@ -59,4 +59,3 @@ public class HttpRequestFactory {
         return EntityUtils.toString(entity);
     }
 }
-

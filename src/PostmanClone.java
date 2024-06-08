@@ -1,4 +1,3 @@
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.HttpClients;
 
@@ -16,12 +15,10 @@ public class PostmanClone extends JFrame {
     private JButton saveButton;
     private JPanel collectionsPanel;
 
-    private HttpClient httpClient;
-    private HttpRequestFactory httpRequestFactory;
+    private HTTPService httpService;
 
     public PostmanClone() {
-        httpClient = HttpClients.createDefault();
-        httpRequestFactory = new HttpRequestFactory();
+        httpService = new HTTPService();
 
         setTitle("Postman Clone");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -98,9 +95,9 @@ public class PostmanClone extends JFrame {
         String requestBody = requestBodyArea.getText();
 
         try {
-            HttpRequestBase request = httpRequestFactory.createRequest(method, url, requestBody);
-            httpRequestFactory.addHeaders(request, headers);
-            String responseBody = httpRequestFactory.executeRequest(request);
+            HttpRequestBase request = httpService.createRequest(method, url, requestBody);
+            httpService.addHeaders(request, headers);
+            String responseBody = httpService.executeRequest(request);
             responseTextArea.setText(responseBody);
         } catch (IOException e) {
             e.printStackTrace();
