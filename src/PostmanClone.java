@@ -186,6 +186,30 @@ public class PostmanClone extends JFrame {
             folderNode = addCollection(folderName);
         }
 
+        DefaultMutableTreeNode requestNode = createRequestNode(request);
+
+        folderNode.add(requestNode);
+
+        treeModel.reload(folderNode);
+    }
+
+    private void loadSavedRequests() {
+        addCollection("Recent"); // Add the default "Recent" folder
+
+        List<RequestDAO.Request> requests = requestDAO.getAllRequests();
+        for (RequestDAO.Request request : requests) {
+            String folderName = request.getFolder() != null && !request.getFolder().isEmpty() ? request.getFolder() : "Recent";
+            DefaultMutableTreeNode folderNode = addCollection(folderName);
+
+            DefaultMutableTreeNode requestNode = createRequestNode(request);
+
+            folderNode.add(requestNode);
+
+            treeModel.reload(folderNode);
+        }
+    }
+
+    private DefaultMutableTreeNode createRequestNode(RequestDAO.Request request) {
         // Create the main node for the request
         DefaultMutableTreeNode requestNode = new DefaultMutableTreeNode(request.getMethod() + ": " + request.getUrl());
 
@@ -201,44 +225,7 @@ public class PostmanClone extends JFrame {
         requestNode.add(headersNode);
         requestNode.add(bodyNode);
 
-        // Add the main request node to the folder node
-        folderNode.add(requestNode);
-
-        // Update the tree model
-        treeModel.reload(folderNode);
-    }
-
-    private void loadSavedRequests() {
-        addCollection("Recent"); // Add the default "Recent" folder
-
-        List<RequestDAO.Request> requests = requestDAO.getAllRequests();
-        for (RequestDAO.Request request : requests) {
-            String folderName = request.getFolder() != null && !request.getFolder().isEmpty() ? request.getFolder() : "Recent";
-            DefaultMutableTreeNode folderNode = addCollection(folderName);
-
-            // Create the main node for the request including method name
-            String requestInfo = request.getMethod() + ": " + request.getUrl();
-            DefaultMutableTreeNode requestNode = new DefaultMutableTreeNode(requestInfo);
-
-            // Create child nodes for URL, headers, and body
-
-            DefaultMutableTreeNode methodNode = new DefaultMutableTreeNode(ViewConstants.HTTP_METHOD_LABEL + request.getMethod());
-            DefaultMutableTreeNode urlNode = new DefaultMutableTreeNode( ViewConstants.HTTP_URL_LABEL + request.getUrl());
-            DefaultMutableTreeNode headersNode = new DefaultMutableTreeNode( ViewConstants.HTTP_HEADERS_LABEL + request.getHeaders());
-            DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode( ViewConstants.HTTP_BODY_LABEL + request.getBody());
-
-            // Add child nodes to the main request node
-            requestNode.add(methodNode);
-            requestNode.add(urlNode);
-            requestNode.add(headersNode);
-            requestNode.add(bodyNode);
-
-            // Add the main request node to the folder node
-            folderNode.add(requestNode);
-
-            // Update the tree model
-            treeModel.reload(folderNode);
-        }
+        return requestNode;
     }
 
     public static void main(String[] args) {
