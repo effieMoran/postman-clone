@@ -160,33 +160,6 @@ public class PostmanClone extends JFrame {
         }
     }
 
-    private void updateCollectionsTree(String folderName, RequestDAO.Request request) {
-        DefaultMutableTreeNode folderNode = folderNodeMap.get(folderName);
-        if (folderNode == null) {
-            folderNode = addCollection(folderName);
-        }
-
-        // Create the main node for the request
-        DefaultMutableTreeNode requestNode = new DefaultMutableTreeNode(request.getMethod() + ": " + request.getUrl());
-
-        // Create child nodes for URL, headers, and body
-        DefaultMutableTreeNode methodNode = new DefaultMutableTreeNode(request.getMethod());
-        DefaultMutableTreeNode urlNode = new DefaultMutableTreeNode(request.getUrl());
-        DefaultMutableTreeNode headersNode = new DefaultMutableTreeNode(request.getHeaders());
-        DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode(request.getBody());
-
-        // Add child nodes to the main request node
-        requestNode.add(methodNode);
-        requestNode.add(urlNode);
-        requestNode.add(headersNode);
-        requestNode.add(bodyNode);
-
-        // Add the main request node to the folder node
-        folderNode.add(requestNode);
-
-        // Update the tree model
-        treeModel.reload(folderNode);
-    }
 
     private DefaultMutableTreeNode addCollection(String folderName) {
         DefaultMutableTreeNode folderNode = folderNodeMap.get(folderName);
@@ -207,6 +180,34 @@ public class PostmanClone extends JFrame {
         }
     }
 
+    private void updateCollectionsTree(String folderName, RequestDAO.Request request) {
+        DefaultMutableTreeNode folderNode = folderNodeMap.get(folderName);
+        if (folderNode == null) {
+            folderNode = addCollection(folderName);
+        }
+
+        // Create the main node for the request
+        DefaultMutableTreeNode requestNode = new DefaultMutableTreeNode(request.getMethod() + ": " + request.getUrl());
+
+        // Create child nodes for URL, headers, and body
+        DefaultMutableTreeNode methodNode = new DefaultMutableTreeNode(ViewConstants.HTTP_METHOD_LABEL + request.getMethod());
+        DefaultMutableTreeNode urlNode = new DefaultMutableTreeNode(ViewConstants.HTTP_URL_LABEL + request.getUrl());
+        DefaultMutableTreeNode headersNode = new DefaultMutableTreeNode(ViewConstants.HTTP_HEADERS_LABEL + request.getHeaders());
+        DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode(ViewConstants.HTTP_BODY_LABEL + request.getBody());
+
+        // Add child nodes to the main request node
+        requestNode.add(methodNode);
+        requestNode.add(urlNode);
+        requestNode.add(headersNode);
+        requestNode.add(bodyNode);
+
+        // Add the main request node to the folder node
+        folderNode.add(requestNode);
+
+        // Update the tree model
+        treeModel.reload(folderNode);
+    }
+
     private void loadSavedRequests() {
         addCollection("Recent"); // Add the default "Recent" folder
 
@@ -221,10 +222,10 @@ public class PostmanClone extends JFrame {
 
             // Create child nodes for URL, headers, and body
 
-            DefaultMutableTreeNode methodNode = new DefaultMutableTreeNode("Method: " + request.getMethod());
-            DefaultMutableTreeNode urlNode = new DefaultMutableTreeNode("URL: " + request.getUrl());
-            DefaultMutableTreeNode headersNode = new DefaultMutableTreeNode("Headers: " + request.getHeaders());
-            DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode("Body: " + request.getBody());
+            DefaultMutableTreeNode methodNode = new DefaultMutableTreeNode(ViewConstants.HTTP_METHOD_LABEL + request.getMethod());
+            DefaultMutableTreeNode urlNode = new DefaultMutableTreeNode( ViewConstants.HTTP_URL_LABEL + request.getUrl());
+            DefaultMutableTreeNode headersNode = new DefaultMutableTreeNode( ViewConstants.HTTP_HEADERS_LABEL + request.getHeaders());
+            DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode( ViewConstants.HTTP_BODY_LABEL + request.getBody());
 
             // Add child nodes to the main request node
             requestNode.add(methodNode);
