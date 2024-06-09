@@ -211,15 +211,19 @@ public class PostmanClone extends JFrame {
             String folderName = request.getFolder() != null && !request.getFolder().isEmpty() ? request.getFolder() : "Recent";
             DefaultMutableTreeNode folderNode = addCollection(folderName);
 
-            // Create the main node for the request
-            DefaultMutableTreeNode requestNode = new DefaultMutableTreeNode(request.getMethod() + ": " + request.getUrl());
+            // Create the main node for the request including method name
+            String requestInfo = request.getMethod() + ": " + request.getUrl();
+            DefaultMutableTreeNode requestNode = new DefaultMutableTreeNode(requestInfo);
 
             // Create child nodes for URL, headers, and body
+
+            DefaultMutableTreeNode methodNode = new DefaultMutableTreeNode("Method: " + request.getMethod());
             DefaultMutableTreeNode urlNode = new DefaultMutableTreeNode("URL: " + request.getUrl());
             DefaultMutableTreeNode headersNode = new DefaultMutableTreeNode("Headers: " + request.getHeaders());
             DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode("Body: " + request.getBody());
 
             // Add child nodes to the main request node
+            requestNode.add(methodNode);
             requestNode.add(urlNode);
             requestNode.add(headersNode);
             requestNode.add(bodyNode);
