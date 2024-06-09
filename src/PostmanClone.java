@@ -113,22 +113,29 @@ public class PostmanClone extends JFrame {
         container.add(collectionsPanel, BorderLayout.WEST);
     }
 
+    //todo: ClientProtocolException handle this
+
     private void sendRequest() {
         String url = urlField.getText();
         String method = (String) methodComboBox.getSelectedItem();
         String headers = headersArea.getText();
         String requestBody = requestBodyArea.getText();
-
         try {
             HttpRequestBase request = httpService.createRequest(method, url, requestBody);
             httpService.addHeaders(request, headers);
             String responseBody = httpService.executeRequest(request);
-            responseTextArea.setText(responseBody);
+
+            // Format the response based on content type
+            String formattedResponse = ResponseFormatter.format(responseBody);
+
+            // Update the response text area with the formatted response
+            responseTextArea.setText(formattedResponse);
         } catch (IOException e) {
             e.printStackTrace();
             responseTextArea.setText("Error: " + e.getMessage());
         }
     }
+
 
     private void saveRequest() {
         String method = (String) methodComboBox.getSelectedItem();
