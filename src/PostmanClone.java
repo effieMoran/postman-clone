@@ -20,7 +20,7 @@ public class PostmanClone extends JFrame {
     private JButton saveButton;
     private JButton addCollectionButton;
     private JPanel collectionsPanel;
-    private JTree folderTree; // Changed to JTree
+    private JTree folderTree;
     private DefaultTreeModel treeModel;
     private DefaultMutableTreeNode root;
     private Map<String, DefaultMutableTreeNode> folderNodeMap;
@@ -163,15 +163,26 @@ public class PostmanClone extends JFrame {
             folderNode = addFolder(folderName);
         }
 
-        // Create a node for the request
+        // Create the main node for the request
         DefaultMutableTreeNode requestNode = new DefaultMutableTreeNode(request.getMethod() + ": " + request.getUrl());
 
-        // Add request node to folder node
+        // Create child nodes for URL, headers, and body
+        DefaultMutableTreeNode urlNode = new DefaultMutableTreeNode("URL: " + request.getUrl());
+        DefaultMutableTreeNode headersNode = new DefaultMutableTreeNode("Headers: " + request.getHeaders());
+        DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode("Body: " + request.getBody());
+
+        // Add child nodes to the main request node
+        requestNode.add(urlNode);
+        requestNode.add(headersNode);
+        requestNode.add(bodyNode);
+
+        // Add the main request node to the folder node
         folderNode.add(requestNode);
 
         // Update the tree model
         treeModel.reload(folderNode);
     }
+
 
     private String getSelectedFolder() {
         TreePath path = folderTree.getSelectionPath();
@@ -202,15 +213,27 @@ public class PostmanClone extends JFrame {
     }
 
     private void loadSavedRequests() {
-        addFolder("Recents"); // Add the default "Recents" folder
+        addFolder("Recent"); // Add the default "Recent" folder
 
         List<RequestDAO.Request> requests = requestDAO.getAllRequests();
         for (RequestDAO.Request request : requests) {
-            String folderName = request.getFolder() != null && !request.getFolder().isEmpty() ? request.getFolder() : "Recents";
+            String folderName = request.getFolder() != null && !request.getFolder().isEmpty() ? request.getFolder() : "Recent";
             DefaultMutableTreeNode folderNode = addFolder(folderName);
 
-            // Create a node for the request
+            // Create the main node for the request
             DefaultMutableTreeNode requestNode = new DefaultMutableTreeNode(request.getMethod() + ": " + request.getUrl());
+
+            // Create child nodes for URL, headers, and body
+            DefaultMutableTreeNode urlNode = new DefaultMutableTreeNode("URL: " + request.getUrl());
+            DefaultMutableTreeNode headersNode = new DefaultMutableTreeNode("Headers: " + request.getHeaders());
+            DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode("Body: " + request.getBody());
+
+            // Add child nodes to the main request node
+            requestNode.add(urlNode);
+            requestNode.add(headersNode);
+            requestNode.add(bodyNode);
+
+            // Add the main request node to the folder node
             folderNode.add(requestNode);
 
             // Update the tree model
