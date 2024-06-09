@@ -35,7 +35,7 @@ public class PostmanClone extends JFrame {
     public PostmanClone() {
         httpService = new HTTPService();
         requestDAO = new RequestDAO();
-        folderRequestMap = new HashMap<>();
+        folderNodeMap = new HashMap<>();  // Initialize folderNodeMap
 
         setTitle("Postman Clone");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -64,21 +64,11 @@ public class PostmanClone extends JFrame {
 
         collectionsPanel = new JPanel(new BorderLayout());
 
-        folderListModel = new DefaultListModel<>();
-        folderList = new JList<>(folderListModel);
-        folderList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        folderList.addListSelectionListener(e -> {
-            String selectedFolder = folderList.getSelectedValue();
-            if (selectedFolder != null) {
-                JList<RequestDAO.Request> requestList = new JList<>(folderRequestMap.get(selectedFolder));
-                JScrollPane scrollPane = new JScrollPane(requestList);
-                collectionsPanel.add(scrollPane, BorderLayout.CENTER);
-                collectionsPanel.revalidate();
-                collectionsPanel.repaint();
-            }
-        });
+        root = new DefaultMutableTreeNode("Root");
+        treeModel = new DefaultTreeModel(root);
+        folderTree = new JTree(treeModel);
 
-        JScrollPane folderScrollPane = new JScrollPane(folderList);
+        JScrollPane folderScrollPane = new JScrollPane(folderTree);
         collectionsPanel.add(addCollectionButton, BorderLayout.NORTH);
         collectionsPanel.add(folderScrollPane, BorderLayout.CENTER);
     }
@@ -165,18 +155,11 @@ public class PostmanClone extends JFrame {
     }
 
     private void updateFolderTree(String folderName, RequestDAO.Request request) {
-        DefaultMutableTreeNode folderNode;
-
-        // If folder is "Recents", get its node; otherwise, create the "Recents" folder node
-        if (folderName.equals("Recents")) {
-            folderNode = folderNodeMap.get("Root");
+        DefaultMutableTreeNode folderNode = folderNodeMap.get(folderName);
+        if (folderNode == null) {
+            folderNode = addFolder("Recents");
         } else {
-            folderNode = folderNodeMap.get("Recents");
-            // If "Recents" folder doesn't exist, create it
-            if (folderNode == null) {
-                addFolder("Recents");
-                folderNode = folderNodeMap.get("Recents");
-            }
+            folderNode = addFolder(folderName);
         }
 
         // Create a node for the request
@@ -197,24 +180,14 @@ public class PostmanClone extends JFrame {
         }
         return null;
     }
-    private void addFolder(String folderName) {
-        if (root == null) {
-            root = new DefaultMutableTreeNode("Root");
-            treeModel = new DefaultTreeModel(root);
-            folderNodeMap = new HashMap<>();
-            folderTree = new JTree(treeModel); // Initialize folderTree
-            collectionsPanel.add(new JScrollPane(folderTree), BorderLayout.CENTER); // Add folderTree to the collectionsPanel
-        }
 
+    private DefaultMutableTreeNode addFolder(String folderName) {
         DefaultMutableTreeNode folderNode = new DefaultMutableTreeNode(folderName);
         root.add(folderNode);
         folderNodeMap.put(folderName, folderNode);
-        DefaultListModel<RequestDAO.Request> requestListModel = new DefaultListModel<>();
-        folderRequestMap.put(folderName, requestListModel);
         treeModel.reload(root); // Reload the root node to update the tree
+        return folderNode;
     }
-
-
 
     private void addCollection() {
         String collectionName = JOptionPane.showInputDialog(this, "Enter Collection Name:");
@@ -228,7 +201,7 @@ public class PostmanClone extends JFrame {
 
         List<RequestDAO.Request> requests = requestDAO.getAllRequests();
         for (RequestDAO.Request request : requests) {
-            DefaultMutableTreeNode folderNode = root; // Default to root folder
+            DefaultMutableTreeNode folderNode = folderNodeMap.get("Recents"); // Default to "Recents" folder
             String folderName = "Recents"; // Default folder name
 
             // If the request has a specific folder assigned, use it
@@ -237,8 +210,7 @@ public class PostmanClone extends JFrame {
                 folderNode = folderNodeMap.get(folderName);
                 if (folderNode == null) {
                     // If the folder doesn't exist, create it
-                    addFolder(folderName);
-                    folderNode = folderNodeMap.get(folderName);
+                    folderNode = addFolder(folderName);
                 }
             }
 
