@@ -64,6 +64,10 @@ public class PostmanClone extends JFrame {
         treeModel = new DefaultTreeModel(root);
         folderTree = new JTree(treeModel);
 
+        // Inside the initComponents() method or any other appropriate initialization method
+        CollectionsTreeMouseListener mouseListener = new CollectionsTreeMouseListener(folderTree, methodComboBox, urlField, headersArea, requestBodyArea);
+        folderTree.addMouseListener(mouseListener);
+
         JScrollPane folderScrollPane = new JScrollPane(folderTree);
         collectionsPanel.add(addCollectionButton, BorderLayout.NORTH);
         collectionsPanel.add(folderScrollPane, BorderLayout.CENTER);
