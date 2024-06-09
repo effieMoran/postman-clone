@@ -3,7 +3,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.io.IOException;
 import java.util.HashMap;
@@ -151,27 +150,29 @@ public class PostmanClone extends JFrame {
                 requestDAO.saveRequest(request, selectedFolder);
 
                 // Update UI and show message
-                updateFolderTree(selectedFolder, request);
+                updateCollectionsTree(selectedFolder, request);
                 JOptionPane.showMessageDialog(this, "Request Saved!");
             }
         }
     }
 
-    private void updateFolderTree(String folderName, RequestDAO.Request request) {
+    private void updateCollectionsTree(String folderName, RequestDAO.Request request) {
         DefaultMutableTreeNode folderNode = folderNodeMap.get(folderName);
         if (folderNode == null) {
-            folderNode = addFolder(folderName);
+            folderNode = addCollection(folderName);
         }
 
         // Create the main node for the request
         DefaultMutableTreeNode requestNode = new DefaultMutableTreeNode(request.getMethod() + ": " + request.getUrl());
 
         // Create child nodes for URL, headers, and body
-        DefaultMutableTreeNode urlNode = new DefaultMutableTreeNode("URL: " + request.getUrl());
-        DefaultMutableTreeNode headersNode = new DefaultMutableTreeNode("Headers: " + request.getHeaders());
-        DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode("Body: " + request.getBody());
+        DefaultMutableTreeNode methodNode = new DefaultMutableTreeNode(request.getMethod());
+        DefaultMutableTreeNode urlNode = new DefaultMutableTreeNode(request.getUrl());
+        DefaultMutableTreeNode headersNode = new DefaultMutableTreeNode(request.getHeaders());
+        DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode(request.getBody());
 
         // Add child nodes to the main request node
+        requestNode.add(methodNode);
         requestNode.add(urlNode);
         requestNode.add(headersNode);
         requestNode.add(bodyNode);
@@ -183,7 +184,7 @@ public class PostmanClone extends JFrame {
         treeModel.reload(folderNode);
     }
 
-    private DefaultMutableTreeNode addFolder(String folderName) {
+    private DefaultMutableTreeNode addCollection(String folderName) {
         DefaultMutableTreeNode folderNode = folderNodeMap.get(folderName);
         if (folderNode == null) {
             folderNode = new DefaultMutableTreeNode(folderName);
@@ -198,17 +199,17 @@ public class PostmanClone extends JFrame {
     private void addCollection() {
         String collectionName = JOptionPane.showInputDialog(this, "Enter Collection Name:");
         if (collectionName != null && !collectionName.isEmpty()) {
-            addFolder(collectionName);
+            addCollection(collectionName);
         }
     }
 
     private void loadSavedRequests() {
-        addFolder("Recent"); // Add the default "Recent" folder
+        addCollection("Recent"); // Add the default "Recent" folder
 
         List<RequestDAO.Request> requests = requestDAO.getAllRequests();
         for (RequestDAO.Request request : requests) {
             String folderName = request.getFolder() != null && !request.getFolder().isEmpty() ? request.getFolder() : "Recent";
-            DefaultMutableTreeNode folderNode = addFolder(folderName);
+            DefaultMutableTreeNode folderNode = addCollection(folderName);
 
             // Create the main node for the request
             DefaultMutableTreeNode requestNode = new DefaultMutableTreeNode(request.getMethod() + ": " + request.getUrl());
