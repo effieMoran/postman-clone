@@ -133,22 +133,28 @@ public class PostmanClone extends JFrame {
         String headers = headersArea.getText();
         String body = requestBodyArea.getText();
 
-        String selectedFolder = getSelectedFolder();
-        RequestDAO.Request request = new RequestDAO.Request(method, url, headers, body);
+        // Get the list of existing folders
+        String[] folderNames = folderNodeMap.keySet().toArray(new String[0]);
 
-        // Set folder to "Recents" if not selected
-        if (selectedFolder == null) {
-            selectedFolder = "Recents";
-            // Clear selection to ensure the "Recents" folder is selected in UI
-            folderTree.clearSelection();
+        // Create the JComboBox for folder selection
+        JComboBox<String> collectionsComboBox = new JComboBox<>(folderNames);
+        collectionsComboBox.setEditable(true); // Allow new folder creation
+
+        // Show the dialog
+        int result = JOptionPane.showConfirmDialog(this, collectionsComboBox, "Select or Create Collection", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            String selectedFolder = (String) collectionsComboBox.getSelectedItem();
+
+            if (selectedFolder != null && !selectedFolder.trim().isEmpty()) {
+                // Save the request with the selected folder name
+                RequestDAO.Request request = new RequestDAO.Request(method, url, headers, body, selectedFolder);
+                requestDAO.saveRequest(request, selectedFolder);
+
+                // Update UI and show message
+                updateFolderTree(selectedFolder, request);
+                JOptionPane.showMessageDialog(this, "Request Saved!");
+            }
         }
-
-        // Save the request with the selected folder name
-        requestDAO.saveRequest(request, selectedFolder);
-
-        // Update UI and show message
-        updateFolderTree(selectedFolder, request);
-        JOptionPane.showMessageDialog(this, "Request Saved!");
     }
 
     private void updateFolderTree(String folderName, RequestDAO.Request request) {

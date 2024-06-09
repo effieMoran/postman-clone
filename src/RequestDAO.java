@@ -56,6 +56,13 @@ public class RequestDAO {
                 this.body = body;
             }
 
+        public Request(String method, String url, String headers, String body, String folder) {
+            this.method = method;
+            this.url = url;
+            this.headers = headers;
+            this.body = body;
+            this.folder = folder;
+        }
             // Getter and setter methods for folder
             public String getFolder() {
                 return folder;
