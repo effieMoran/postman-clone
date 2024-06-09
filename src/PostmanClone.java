@@ -183,16 +183,6 @@ public class PostmanClone extends JFrame {
         treeModel.reload(folderNode);
     }
 
-
-    private String getSelectedFolder() {
-        TreePath path = folderTree.getSelectionPath();
-        if (path != null) {
-            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-            return selectedNode.getUserObject().toString();
-        }
-        return null;
-    }
-
     private DefaultMutableTreeNode addFolder(String folderName) {
         DefaultMutableTreeNode folderNode = folderNodeMap.get(folderName);
         if (folderNode == null) {
