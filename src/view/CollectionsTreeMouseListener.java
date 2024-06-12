@@ -1,3 +1,5 @@
+package view;
+
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -36,7 +38,7 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
 
     private void showPopupMenu(MouseEvent e, DefaultMutableTreeNode selectedNode) {
         JPopupMenu popupMenu = new JPopupMenu();
-        JMenuItem fillComponentsItem = new JMenuItem("Fill Components with Request Details");
+        JMenuItem fillComponentsItem = new JMenuItem("Fill Components with model.Request Details");
         fillComponentsItem.addActionListener(actionEvent -> {
             // Get the first child node (request node) under the selected collection
             //DefaultMutableTreeNode selectedNode = selectedNode;
