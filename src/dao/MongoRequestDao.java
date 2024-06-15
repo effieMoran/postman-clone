@@ -39,14 +39,14 @@ public class MongoRequestDao implements Dao<Request> {
 
     @Override
     public Request save(Request request) {
-        Document doc = new Document("method", request.getMethod())
-                .append("url", request.getUrl())
-                .append("headers", request.getHeaders())
-                .append("body", request.getBody())
-                .append("folder", request.getFolder());
+        Document doc = new Document(METHOD, request.getMethod())
+                .append(URL, request.getUrl())
+                .append(HEADERS, request.getHeaders())
+                .append(BODY, request.getBody())
+                .append(FOLDER, request.getFolder());
         collection.insertOne(doc);
-        ObjectId id = doc.getObjectId("_id");
-        request.setId(id.toHexString());  // Convert ObjectId to string and set it
+        ObjectId id = doc.getObjectId(ID);
+        request.setId(id.toHexString());
         return request;
     }
 
@@ -70,7 +70,7 @@ public class MongoRequestDao implements Dao<Request> {
 
         // Perform the update operation in the collection
         com.mongodb.client.result.UpdateResult result = collection.updateOne(
-                new Document("_id", objectId),
+                new Document(ID, objectId),
                 new Document("$set", updatedDoc)
         );
 
@@ -88,13 +88,13 @@ public class MongoRequestDao implements Dao<Request> {
 
     @Override
     public Request get(String id) {
-        Document doc = collection.find(new Document("_id", new ObjectId(id))).first();
+        Document doc = collection.find(new Document(ID, new ObjectId(id))).first();
         if (doc != null) {
-            String method = doc.getString("method");
-            String url = doc.getString("url");
-            String headers = doc.getString("headers");
-            String body = doc.getString("body");
-            String folder = doc.getString("folder");
+            String method = doc.getString(METHOD);
+            String url = doc.getString(URL);
+            String headers = doc.getString(HEADERS);
+            String body = doc.getString(BODY);
+            String folder = doc.getString(FOLDER);
 
             return new Request(id, method, url, headers, body, folder);
         } else {
@@ -103,17 +103,15 @@ public class MongoRequestDao implements Dao<Request> {
         }
     }
 
-
-
     @Override
     public void delete(Request request) {
-        collection.deleteOne(new Document("_id", request.getId()));
+        collection.deleteOne(new Document(ID, request.getId()));
     }
 
     @Override
     public void delete(String id) {
         ObjectId objectId = new ObjectId(id);
-        collection.deleteOne(new Document("_id", objectId));
+        collection.deleteOne(new Document(ID, objectId));
     }
     private Request documentToRequest(Document doc) {
         Request request = new Request(
@@ -122,7 +120,7 @@ public class MongoRequestDao implements Dao<Request> {
                 doc.getString(HEADERS),
                 doc.getString(BODY),
                 doc.getString(FOLDER));
-        request.setId(doc.getObjectId("_id").toHexString());
+        request.setId(doc.getObjectId(ID).toHexString());
         return request;
     }
 }

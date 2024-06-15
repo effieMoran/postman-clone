@@ -174,6 +174,4 @@ public class ResponseFormatter {
         transformer.transform(source, result);
         return writer.toString();
     }
-
-
 }
