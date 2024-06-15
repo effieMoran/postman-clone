@@ -25,6 +25,8 @@ public class PostmanClone extends JFrame {
     private JTextArea responseTextArea;
     private JButton sendButton;
     private JButton saveButton;
+
+    private JButton editButton;
     private JButton addCollectionButton;
     private JPanel collectionsPanel;
     private JTree folderTree;
@@ -62,6 +64,9 @@ public class PostmanClone extends JFrame {
         responseTextArea.setEditable(false);
         sendButton = new JButton("Send");
         saveButton = new JButton("Save");
+        editButton = new JButton("Edit");
+        editButton.addActionListener(e -> editRequest());
+        editButton.setVisible(false);
         addCollectionButton = new JButton("Add Collection");
         sendButton.addActionListener(e -> sendRequest());
         saveButton.addActionListener(e -> saveRequest());
@@ -73,7 +78,8 @@ public class PostmanClone extends JFrame {
         treeModel = new DefaultTreeModel(root);
         folderTree = new JTree(treeModel);
 
-        CollectionsTreeMouseListener mouseListener = new CollectionsTreeMouseListener(folderTree, methodComboBox, urlField, headersArea, requestBodyArea,requestDao);
+        CollectionsTreeMouseListener mouseListener = new CollectionsTreeMouseListener(folderTree, methodComboBox,
+                urlField, headersArea, requestBodyArea,requestDao, saveButton, editButton);
         folderTree.addMouseListener(mouseListener);
 
         JScrollPane folderScrollPane = new JScrollPane(folderTree);
@@ -92,6 +98,7 @@ public class PostmanClone extends JFrame {
         topPanel.add(urlField);
         topPanel.add(sendButton);
         topPanel.add(saveButton);
+        topPanel.add(editButton);
         container.add(topPanel, BorderLayout.NORTH);
 
         JPanel centerPanel = new JPanel(new BorderLayout());
@@ -122,6 +129,69 @@ public class PostmanClone extends JFrame {
     }
 
     //todo: ClientProtocolException handle this
+
+    private void editRequest() {
+        // Retrieve the selected node from the tree
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) folderTree.getLastSelectedPathComponent();
+
+        if (selectedNode != null) {
+            // Retrieve the ID of the request from the selected node
+            String requestId = null;
+            for (int i = 0; i < selectedNode.getChildCount(); i++) {
+                DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
+                String nodeInfo = childNode.getUserObject().toString();
+                if (nodeInfo.startsWith("Id: ")) {
+                    requestId = nodeInfo.substring("Id: ".length()).trim();
+                    break;  // Exit loop once ID is found
+                }
+            }
+
+            if (requestId != null) {
+                // Retrieve the existing request from the database
+                Request existingRequest = requestDao.get(requestId);
+                if (existingRequest != null) {
+                    // Update the existing request with UI values
+                    existingRequest.setBody(requestBodyArea.getText());
+                    existingRequest.setHeaders(headersArea.getText());
+                    existingRequest.setMethod((String) methodComboBox.getSelectedItem());
+                    existingRequest.setUrl(urlField.getText());
+
+                    // Save the updated request to the database
+                    requestDao.update(existingRequest);
+
+                    // Update the tree node with the new values
+                    selectedNode.setUserObject(existingRequest.getMethod() + ": " + existingRequest.getUrl());
+
+                    // Update the child nodes with the new values
+                    for (int i = 0; i < selectedNode.getChildCount(); i++) {
+                        DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
+                        String nodeInfo = childNode.getUserObject().toString();
+                        if (nodeInfo.startsWith("Method: ")) {
+                            childNode.setUserObject("Method: " + existingRequest.getMethod());
+                        } else if (nodeInfo.startsWith("URL: ")) {
+                            childNode.setUserObject("URL: " + existingRequest.getUrl());
+                        } else if (nodeInfo.startsWith("Headers: ")) {
+                            childNode.setUserObject("Headers: " + existingRequest.getHeaders());
+                        } else if (nodeInfo.startsWith("Body: ")) {
+                            childNode.setUserObject("Body: " + existingRequest.getBody());
+                        }
+                    }
+
+                    // Reload the tree model to reflect the changes
+                    treeModel.reload(selectedNode);
+
+                    // Optionally, show a confirmation message
+                    JOptionPane.showMessageDialog(folderTree, "Request updated successfully!");
+                } else {
+                    JOptionPane.showMessageDialog(folderTree, "Request not found in database.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(folderTree, "ID not found in node", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(folderTree, "No node selected.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
     private void sendRequest() {
         String url = urlField.getText();

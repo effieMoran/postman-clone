@@ -9,6 +9,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Optional;
 
 public class CollectionsTreeMouseListener extends MouseAdapter {
     private JTree folderTree;
@@ -19,14 +20,20 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
 
     private Dao<Request> requestDao;
 
+    private JButton saveButton;
+
+    private JButton editButton;
     public CollectionsTreeMouseListener(JTree folderTree, JComboBox<String> methodComboBox, JTextField urlField,
-                                        JTextArea headersArea, JTextArea requestBodyArea, Dao<Request> requestDao) {
+                                        JTextArea headersArea, JTextArea requestBodyArea, Dao<Request> requestDao
+                                        , JButton saveButton, JButton editButton) {
         this.folderTree = folderTree;
         this.methodComboBox = methodComboBox;
         this.urlField = urlField;
         this.headersArea = headersArea;
         this.requestBodyArea = requestBodyArea;
         this.requestDao = requestDao;
+        this.saveButton = saveButton;
+        this.editButton = editButton;
     }
 
     @Override
@@ -39,6 +46,9 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
                 if (selectedNode != null && !selectedNode.isLeaf()) { // Check if it's a collection node
                     // Display a popup menu with the option to fill the components
                     showPopupMenu(e, selectedNode);
+
+                    // Show the edit button when a collection node is selected
+                    editButton.setVisible(true);
                 }
             }
         }
@@ -86,15 +96,18 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
         });
         popupMenu.add(fillComponentsItem);
 
-        // "Edit" menu item
         JMenuItem editItem = new JMenuItem("Edit");
         editItem.addActionListener(actionEvent -> {
             if (selectedNode != null) {
-                // Implement edit functionality here
-                // For example, open a dialog to edit the node details
+                // When the Edit menu option is clicked, hide the save button and show the edit button
+                saveButton.setVisible(false);
+                editButton.setVisible(true);
+
+                // Call the editNode method to update the content
                 editNode(selectedNode);
             }
         });
+        popupMenu.add(editItem);
 
         popupMenu.add(editItem);
         JMenuItem deleteItem = new JMenuItem("Delete");
@@ -110,7 +123,6 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
                     }
                 }
 
-                System.out.println(id);
                 if (id != null && !id.isEmpty()) {
                     try {
                         // Delete the request from the database
@@ -139,14 +151,54 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
         });
         popupMenu.add(deleteItem);
 
-
         popupMenu.show(folderTree, e.getX(), e.getY());
     }
 
-    // Placeholder method for editing a node
     private void editNode(DefaultMutableTreeNode selectedNode) {
-       //TODO: EDIT ELEMENT
+        // Retrieve the ID of the request from the node
+        String requestId = null;
+        for (int i = 0; i < selectedNode.getChildCount(); i++) {
+            DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
+            String nodeInfo = childNode.getUserObject().toString();
+            if (nodeInfo.startsWith("Id: ")) {
+                requestId = nodeInfo.substring("Id: ".length()).trim();
+                break;  // Exit loop once ID is found
+            }
+        }
+
+        if (requestId != null) {
+            Request request = requestDao.get(requestId);
+            if (request != null) {
+                // Populate UI components with the current request details
+                methodComboBox.setSelectedItem(request.getMethod());
+                urlField.setText(request.getUrl());
+                headersArea.setText(request.getHeaders());
+                requestBodyArea.setText(request.getBody());
+            } else {
+                JOptionPane.showMessageDialog(folderTree, "Request not found in database.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(folderTree, "ID not found in node", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
+    // Method to clear all UI fields
+    private void clearFields() {
+        methodComboBox.setSelectedIndex(0);
+        urlField.setText("");
+        headersArea.setText("");
+        requestBodyArea.setText("");
+        // Hide the edit button
+        editButton.setVisible(false);
+    }
+
+    // Method to handle editing the request
+    private void handleEdit() {
+        // Hide the edit button
+        editButton.setVisible(false);
+        // Display the save button
+        saveButton.setVisible(true);
+    }
+
 
 
 }

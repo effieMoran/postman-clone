@@ -18,6 +18,14 @@ public class Request {
         this.body = body;
     }
 
+    public Request(String id, String method, String url, String headers, String body, String folder) {
+        this.method = method;
+        this.url = url;
+        this.headers = headers;
+        this.body = body;
+        this.id = id;
+        this.folder = folder;
+    }
     public Request(String method, String url, String headers, String body, String folder) {
         this.method = method;
         this.url = url;
@@ -67,6 +75,18 @@ public class Request {
 
     public void setHeaders(String headers) {
         this.headers = headers;
+    }
+
+    @Override
+    public String toString() {
+        return "Request{" +
+                "id='" + id + '\'' +
+                ", method='" + method + '\'' +
+                ", url='" + url + '\'' +
+                ", headers='" + headers + '\'' +
+                ", body='" + body + '\'' +
+                ", folder='" + folder + '\'' +
+                '}';
     }
 
     public String getBody() {
