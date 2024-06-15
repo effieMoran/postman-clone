@@ -9,7 +9,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Optional;
 
 public class CollectionsTreeMouseListener extends MouseAdapter {
     private JTree folderTree;

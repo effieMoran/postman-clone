@@ -180,8 +180,9 @@ public class PostmanClone extends JFrame {
                     // Reload the tree model to reflect the changes
                     treeModel.reload(selectedNode);
 
-                    // Optionally, show a confirmation message
                     JOptionPane.showMessageDialog(folderTree, "Request updated successfully!");
+
+                    handleEdit();
                 } else {
                     JOptionPane.showMessageDialog(folderTree, "Request not found in database.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -191,6 +192,11 @@ public class PostmanClone extends JFrame {
         } else {
             JOptionPane.showMessageDialog(folderTree, "No node selected.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void handleEdit() {
+        editButton.setVisible(false);
+        saveButton.setVisible(true);
     }
 
     private void sendRequest() {
