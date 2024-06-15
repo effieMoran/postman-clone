@@ -3,7 +3,7 @@ package view;
 import config.DataBaseConfiguration;
 import dao.Dao;
 import dao.MongoRequestDao;
-import helpers.HTTPService;
+import service.HTTPService;
 import helpers.ResponseFormatter;
 import model.Request;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -54,7 +54,7 @@ public class PostmanClone extends JFrame {
     }
 
     private void initComponents() {
-        urlField = new JTextField("http://google.com", 40);
+        urlField = new JTextField("http://www.google.com", 40);
         methodComboBox = new JComboBox<>(new String[]{"GET", "POST", "PUT", "DELETE"});
         headersArea = new JTextArea(5, 30);
         requestBodyArea = new JTextArea(10, 30);
@@ -73,7 +73,7 @@ public class PostmanClone extends JFrame {
         treeModel = new DefaultTreeModel(root);
         folderTree = new JTree(treeModel);
 
-        CollectionsTreeMouseListener mouseListener = new CollectionsTreeMouseListener(folderTree, methodComboBox, urlField, headersArea, requestBodyArea);
+        CollectionsTreeMouseListener mouseListener = new CollectionsTreeMouseListener(folderTree, methodComboBox, urlField, headersArea, requestBodyArea,requestDao);
         folderTree.addMouseListener(mouseListener);
 
         JScrollPane folderScrollPane = new JScrollPane(folderTree);
@@ -165,11 +165,11 @@ public class PostmanClone extends JFrame {
             if (selectedFolder != null && !selectedFolder.trim().isEmpty()) {
                 // Save the request with the selected folder name
                 Request request = new Request(method, url, headers, body, selectedFolder);
-                requestDao.save(request);
+                request = requestDao.save(request);
 
                 // Update UI and show message
                 updateCollectionsTree(selectedFolder, request);
-                JOptionPane.showMessageDialog(this, "model.Request Saved!");
+                JOptionPane.showMessageDialog(this, "Request Saved!");
             }
         }
     }
@@ -226,12 +226,14 @@ public class PostmanClone extends JFrame {
         DefaultMutableTreeNode requestNode = new DefaultMutableTreeNode(request.getMethod() + ": " + request.getUrl());
 
         // Create child nodes for URL, headers, and body
+        DefaultMutableTreeNode idNode = new DefaultMutableTreeNode("Id: " + request.getId());
         DefaultMutableTreeNode methodNode = new DefaultMutableTreeNode("Method: " + request.getMethod());
         DefaultMutableTreeNode urlNode = new DefaultMutableTreeNode("URL: " + request.getUrl());
         DefaultMutableTreeNode headersNode = new DefaultMutableTreeNode("Headers: " + request.getHeaders());
         DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode("Body: " + request.getBody());
 
         // Add child nodes to the main request node
+        requestNode.add(idNode);
         requestNode.add(methodNode);
         requestNode.add(urlNode);
         requestNode.add(headersNode);
@@ -240,7 +242,6 @@ public class PostmanClone extends JFrame {
         return requestNode;
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(PostmanClone::new);
-    }
+
+
 }

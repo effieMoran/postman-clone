@@ -5,6 +5,7 @@ import com.mongodb.client.MongoDatabase;
 import config.DataBaseConfiguration;
 import model.Request;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,14 +42,16 @@ public class MongoRequestDao implements Dao<Request> {
     }
 
     @Override
-    public void save(Request request) {
-        Document doc = new Document()
-                .append(METHOD, request.getMethod())
-                .append(URL, request.getUrl())
-                .append(HEADERS, request.getHeaders())
-                .append(BODY, request.getBody())
-                .append(FOLDER, request.getFolder());
+    public Request save(Request request) {
+        Document doc = new Document("method", request.getMethod())
+                .append("url", request.getUrl())
+                .append("headers", request.getHeaders())
+                .append("body", request.getBody())
+                .append("folder", request.getFolder());
         collection.insertOne(doc);
+        ObjectId id = doc.getObjectId("_id");
+        request.setId(id.toHexString());  // Convert ObjectId to string and set it
+        return request;
     }
 
     @Override
@@ -68,6 +71,11 @@ public class MongoRequestDao implements Dao<Request> {
         collection.deleteOne(new Document("_id", request.getId()));
     }
 
+    @Override
+    public void delete(String id) {
+        ObjectId objectId = new ObjectId(id);
+        collection.deleteOne(new Document("_id", objectId));
+    }
     private Request documentToRequest(Document doc) {
         Request request = new Request(
                 doc.getString(METHOD),

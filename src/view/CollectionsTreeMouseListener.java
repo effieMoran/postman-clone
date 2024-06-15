@@ -1,7 +1,11 @@
 package view;
 
+import dao.Dao;
+import model.Request;
+
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -13,12 +17,16 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
     private JTextArea headersArea;
     private JTextArea requestBodyArea;
 
-    public CollectionsTreeMouseListener(JTree folderTree, JComboBox<String> methodComboBox, JTextField urlField, JTextArea headersArea, JTextArea requestBodyArea) {
+    private Dao<Request> requestDao;
+
+    public CollectionsTreeMouseListener(JTree folderTree, JComboBox<String> methodComboBox, JTextField urlField,
+                                        JTextArea headersArea, JTextArea requestBodyArea, Dao<Request> requestDao) {
         this.folderTree = folderTree;
         this.methodComboBox = methodComboBox;
         this.urlField = urlField;
         this.headersArea = headersArea;
         this.requestBodyArea = requestBodyArea;
+        this.requestDao = requestDao;
     }
 
     @Override
@@ -38,10 +46,9 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
 
     private void showPopupMenu(MouseEvent e, DefaultMutableTreeNode selectedNode) {
         JPopupMenu popupMenu = new JPopupMenu();
-        JMenuItem fillComponentsItem = new JMenuItem("Fill Components with model.Request Details");
+
+        JMenuItem fillComponentsItem = new JMenuItem("Load");
         fillComponentsItem.addActionListener(actionEvent -> {
-            // Get the first child node (request node) under the selected collection
-            //DefaultMutableTreeNode selectedNode = selectedNode;
             if (selectedNode != null) {
                 // Retrieve request details from the child node
                 String method = null;
@@ -78,6 +85,68 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
             }
         });
         popupMenu.add(fillComponentsItem);
+
+        // "Edit" menu item
+        JMenuItem editItem = new JMenuItem("Edit");
+        editItem.addActionListener(actionEvent -> {
+            if (selectedNode != null) {
+                // Implement edit functionality here
+                // For example, open a dialog to edit the node details
+                editNode(selectedNode);
+            }
+        });
+
+        popupMenu.add(editItem);
+        JMenuItem deleteItem = new JMenuItem("Delete");
+        deleteItem.addActionListener(actionEvent -> {
+            if (selectedNode != null) {
+                String id = null;
+
+                for (int i = 0; i < selectedNode.getChildCount(); i++) {
+                    DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
+                    String nodeInfo = childNode.getUserObject().toString();
+                    if (nodeInfo.startsWith("Id: ")) {
+                        id = nodeInfo.substring("Id: ".length()).trim();
+                    }
+                }
+
+                System.out.println(id);
+                if (id != null && !id.isEmpty()) {
+                    try {
+                        // Delete the request from the database
+                        requestDao.delete(id);
+
+                        // Remove the node from the tree
+                        DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
+                        if (parentNode != null) {
+                            parentNode.remove(selectedNode);
+                            ((DefaultTreeModel) folderTree.getModel()).reload(parentNode);
+                        } else {
+                            DefaultTreeModel model = (DefaultTreeModel) folderTree.getModel();
+                            model.setRoot(null); // or model.removeNodeFromParent(selectedNode);
+                        }
+
+                        JOptionPane.showMessageDialog(folderTree, "Request Deleted!");
+                    } catch (NumberFormatException e1) {
+                        // Handle parsing exception (e.g., invalid ID format)
+                        e1.printStackTrace();
+                        JOptionPane.showMessageDialog(folderTree, "Invalid ID format: " + id, "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(folderTree, "ID not found in node", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        popupMenu.add(deleteItem);
+
+
         popupMenu.show(folderTree, e.getX(), e.getY());
     }
+
+    // Placeholder method for editing a node
+    private void editNode(DefaultMutableTreeNode selectedNode) {
+       //TODO: EDIT ELEMENT
+    }
+
+
 }
