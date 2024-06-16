@@ -50,12 +50,6 @@ public class MongoRequestDao implements Dao<Request> {
 
     @Override
     public void update(Request request) {
-        // Retrieve the existing request to check the current state
-        Request exists = this.get(request.getId());
-        System.out.println(exists);
-        System.out.println(request);
-
-        // Create a Document with the updated fields from the request
         Document updatedDoc = new Document()
                 .append(METHOD, request.getMethod())
                 .append(URL, request.getUrl())
@@ -63,25 +57,12 @@ public class MongoRequestDao implements Dao<Request> {
                 .append(BODY, request.getBody())
                 .append(FOLDER, request.getFolder());
 
-        // Convert the request ID to ObjectId
         ObjectId objectId = new ObjectId(request.getId());
 
-        // Perform the update operation in the collection
-        com.mongodb.client.result.UpdateResult result = collection.updateOne(
+        collection.updateOne(
                 new Document(ID, objectId),
                 new Document("$set", updatedDoc)
         );
-
-        // Check if the update was successful
-        if (result.getModifiedCount() > 0) {
-            System.out.println("Request updated successfully!");
-        } else {
-            // TODO; throw an exception
-            System.out.println("No request was updated.");
-            System.out.println("Matched count: " + result.getMatchedCount());
-            System.out.println("Modified count: " + result.getModifiedCount());
-            System.out.println("Acknowledged: " + result.wasAcknowledged());
-        }
     }
 
     @Override
@@ -96,7 +77,6 @@ public class MongoRequestDao implements Dao<Request> {
 
             return new Request(id, method, url, headers, body, folder);
         } else {
-            // Document not found, return null or throw an exception as per your requirement
             return null;
         }
     }

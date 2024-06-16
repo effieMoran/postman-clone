@@ -20,7 +20,7 @@ public class ResponseFormatter {
         JSON,
         XML,
         HTML,
-        TEXT // Add more content types if needed
+        TEXT
     }
     public static String format(String response) {
         try {
@@ -144,9 +144,7 @@ public class ResponseFormatter {
 
     private static String formatXML(String xmlString) {
         try {
-            // Parse the XML string
             Document document = parseXML(xmlString);
-            // Format the parsed XML document
             return formatDocument(document);
         } catch (Exception e) {
             return "Invalid XML: " + e.getMessage();
@@ -161,13 +159,11 @@ public class ResponseFormatter {
     }
 
     private static String formatDocument(Document document) throws Exception {
-        // Create a Transformer for formatting
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         transformer.setOutputProperty("indent", "yes");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
-        // Convert the Document to a String
         StringWriter writer = new StringWriter();
         StreamResult result = new StreamResult(writer);
         DOMSource source = new DOMSource(document);

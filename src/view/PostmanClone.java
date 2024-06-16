@@ -205,9 +205,6 @@ public class PostmanClone extends JFrame {
         clearButton.setVisible(true);
         saveButton.setVisible(true);
     }
-
-    //todo: ClientProtocolException handle this
-
     private void sendRequest() {
         String url = urlField.getText();
         String method = (String) methodComboBox.getSelectedItem();
@@ -218,10 +215,8 @@ public class PostmanClone extends JFrame {
             httpService.addHeaders(request, headers);
             String responseBody = httpService.executeRequest(request);
 
-            // Format the response based on content type
             String formattedResponse = ResponseFormatter.format(responseBody);
 
-            // Update the response text area with the formatted response
             responseTextArea.setText(formattedResponse);
         } catch (IOException e) {
             e.printStackTrace();
@@ -235,24 +230,19 @@ public class PostmanClone extends JFrame {
         String headers = headersArea.getText();
         String body = requestBodyArea.getText();
 
-        // Get the list of existing folders
         String[] folderNames = folderNodeMap.keySet().toArray(new String[0]);
 
-        // Create the JComboBox for folder selection
         JComboBox<String> collectionsComboBox = new JComboBox<>(folderNames);
         collectionsComboBox.setEditable(true); // Allow new folder creation
 
-        // Show the dialog
         int result = JOptionPane.showConfirmDialog(this, collectionsComboBox, "Select or Create Collection", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
             String selectedFolder = (String) collectionsComboBox.getSelectedItem();
 
             if (selectedFolder != null && !selectedFolder.trim().isEmpty()) {
-                // Save the request with the selected folder name
                 Request request = new Request(method, url, headers, body, selectedFolder);
                 request = requestDao.save(request);
 
-                // Update UI and show message
                 updateCollectionsTree(selectedFolder, request);
                 JOptionPane.showMessageDialog(this, "Request Saved!");
             }
@@ -307,17 +297,14 @@ public class PostmanClone extends JFrame {
     }
 
     private DefaultMutableTreeNode createRequestNode(Request request) {
-        // Create the main node for the request
         DefaultMutableTreeNode requestNode = new DefaultMutableTreeNode(request.getMethod() + ": " + request.getUrl());
 
-        // Create child nodes for URL, headers, and body
         DefaultMutableTreeNode idNode = new DefaultMutableTreeNode(ViewConstants.HTTP_ID_LABEL + request.getId());
         DefaultMutableTreeNode methodNode = new DefaultMutableTreeNode(ViewConstants.HTTP_METHOD_LABEL + request.getMethod());
         DefaultMutableTreeNode urlNode = new DefaultMutableTreeNode(ViewConstants.HTTP_URL_LABEL + request.getUrl());
         DefaultMutableTreeNode headersNode = new DefaultMutableTreeNode(ViewConstants.HTTP_HEADERS_LABEL + request.getHeaders());
         DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode(ViewConstants.HTTP_BODY_LABEL + request.getBody());
 
-        // Add child nodes to the main request node
         requestNode.add(idNode);
         requestNode.add(methodNode);
         requestNode.add(urlNode);

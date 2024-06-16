@@ -46,7 +46,6 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
     @Override
     public void mouseClicked(MouseEvent e) {
         if (SwingUtilities.isRightMouseButton(e)) {
-            // Get the path to the node that was right-clicked
             TreePath path = folderTree.getPathForLocation(e.getX(), e.getY());
             if (path != null) {
                 DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
@@ -60,10 +59,9 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
                         }
                     }
                     if (hasLeafChildren) {
-                        // Display a popup menu with the option to fill the components
                         showPopupMenu(e, selectedNode);
                     } else {
-                        editButton.setVisible(false); // Hide the edit button if a folder with leaf children is not selected
+                        editButton.setVisible(false);
                     }
                 }
             }
@@ -183,7 +181,6 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
 
                     JOptionPane.showMessageDialog(folderTree, "Request Deleted!");
                 } catch (NumberFormatException e1) {
-                    // Handle parsing exception (e.g., invalid ID format)
                     e1.printStackTrace();
                     JOptionPane.showMessageDialog(folderTree, "Invalid ID format: " + id, "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -194,14 +191,13 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
     }
 
     private void editNode(DefaultMutableTreeNode selectedNode) {
-        // Retrieve the ID of the request from the node
         String requestId = null;
         for (int i = 0; i < selectedNode.getChildCount(); i++) {
             DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
             String nodeInfo = childNode.getUserObject().toString();
             if (nodeInfo.startsWith(ViewConstants.HTTP_ID_LABEL)) {
                 requestId = nodeInfo.substring(ViewConstants.HTTP_ID_LABEL.length()).trim();
-                break;  // Exit loop once ID is found
+                break;
             }
         }
 
