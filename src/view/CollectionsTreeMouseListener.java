@@ -22,9 +22,14 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
     private JButton saveButton;
 
     private JButton editButton;
+
+    private JButton cancelButton;
+
+    private JButton clearButton;
+
     public CollectionsTreeMouseListener(JTree folderTree, JComboBox<String> methodComboBox, JTextField urlField,
-                                        JTextArea headersArea, JTextArea requestBodyArea, Dao<Request> requestDao
-                                        , JButton saveButton, JButton editButton) {
+                                        JTextArea headersArea, JTextArea requestBodyArea, Dao<Request> requestDao,
+                                        JButton saveButton, JButton editButton, JButton cancelButton, JButton clearButton) {
         this.folderTree = folderTree;
         this.methodComboBox = methodComboBox;
         this.urlField = urlField;
@@ -33,6 +38,8 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
         this.requestDao = requestDao;
         this.saveButton = saveButton;
         this.editButton = editButton;
+        this.cancelButton = cancelButton;
+        this.clearButton = clearButton;
     }
 
     @Override
@@ -42,12 +49,42 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
             TreePath path = folderTree.getPathForLocation(e.getX(), e.getY());
             if (path != null) {
                 DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-                if (selectedNode != null && !selectedNode.isLeaf()) { // Check if it's a collection node
-                    // Display a popup menu with the option to fill the components
-                    showPopupMenu(e, selectedNode);
+                if (selectedNode != null && selectedNode.getParent() != null && selectedNode.getChildCount() > 0) {
+                    boolean hasLeafChildren = true;
+                    for (int i = 0; i < selectedNode.getChildCount(); i++) {
+                        DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
+                        if (!childNode.isLeaf()) {
+                            hasLeafChildren = false;
+                            break;
+                        }
+                    }
+                    if (hasLeafChildren) {
+                        // Display a popup menu with the option to fill the components
+                        showPopupMenu(e, selectedNode);
 
-                    // Show the edit button when a collection node is selected
-                    editButton.setVisible(true);
+                        // Show the edit button when a request node is selected
+                        editButton.setVisible(true);
+                    }
+                }
+            }
+        } else if (SwingUtilities.isLeftMouseButton(e)) {
+            TreePath path = folderTree.getPathForLocation(e.getX(), e.getY());
+            if (path != null) {
+                folderTree.setSelectionPath(path);
+                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+                if (selectedNode != null && selectedNode.getParent() != null && selectedNode.getChildCount() > 0) {
+                    boolean hasLeafChildren = true;
+                    for (int i = 0; i < selectedNode.getChildCount(); i++) {
+                        DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
+                        if (!childNode.isLeaf()) {
+                            hasLeafChildren = false;
+                            break;
+                        }
+                    }
+                    if (!hasLeafChildren) {
+                        // Do nothing for folder nodes one level above leaf nodes
+                        folderTree.clearSelection();
+                    }
                 }
             }
         }
@@ -98,17 +135,17 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
         JMenuItem editItem = new JMenuItem("Edit");
         editItem.addActionListener(actionEvent -> {
             if (selectedNode != null) {
-                // When the Edit menu option is clicked, hide the save button and show the edit button
+                folderTree.setSelectionPath(new TreePath(selectedNode.getPath()));
                 saveButton.setVisible(false);
                 editButton.setVisible(true);
+                cancelButton.setVisible(true);
+                clearButton.setVisible(true);
 
-                // Call the editNode method to update the content
                 editNode(selectedNode);
             }
         });
         popupMenu.add(editItem);
 
-        popupMenu.add(editItem);
         JMenuItem deleteItem = new JMenuItem("Delete");
         deleteItem.addActionListener(actionEvent -> {
             if (selectedNode != null) {
@@ -180,24 +217,4 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
             JOptionPane.showMessageDialog(folderTree, "ID not found in node", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-    // Method to clear all UI fields
-    private void clearFields() {
-        methodComboBox.setSelectedIndex(0);
-        urlField.setText("");
-        headersArea.setText("");
-        requestBodyArea.setText("");
-        // Hide the edit button
-        editButton.setVisible(false);
-    }
-
-    // Method to handle editing the request
-    private void handleEdit() {
-        // Hide the edit button
-        editButton.setVisible(false);
-        // Display the save button
-        saveButton.setVisible(true);
-    }
-
-
-
 }

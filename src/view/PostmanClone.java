@@ -25,9 +25,11 @@ public class PostmanClone extends JFrame {
     private JTextArea responseTextArea;
     private JButton sendButton;
     private JButton saveButton;
-
     private JButton editButton;
-    private JButton addCollectionButton;
+
+    private JButton cancelButton;
+
+    private JButton clearButton;
     private JPanel collectionsPanel;
     private JTree folderTree;
     private DefaultTreeModel treeModel;
@@ -56,7 +58,7 @@ public class PostmanClone extends JFrame {
     }
 
     private void initComponents() {
-        urlField = new JTextField("http://www.google.com", 40);
+        urlField = new JTextField("http://www.google.com", 30);
         methodComboBox = new JComboBox<>(new String[]{"GET", "POST", "PUT", "DELETE"});
         headersArea = new JTextArea(5, 30);
         requestBodyArea = new JTextArea(10, 30);
@@ -65,25 +67,28 @@ public class PostmanClone extends JFrame {
         sendButton = new JButton("Send");
         saveButton = new JButton("Save");
         editButton = new JButton("Edit");
+        cancelButton = new JButton("Cancel");
+        clearButton = new JButton("Clear");
+
         editButton.addActionListener(e -> editRequest());
         editButton.setVisible(false);
-        addCollectionButton = new JButton("Add Collection");
+        cancelButton.addActionListener(e -> handleCancelEdit());
+        cancelButton.setVisible(false);
+        clearButton.addActionListener(e -> clearFields());
         sendButton.addActionListener(e -> sendRequest());
         saveButton.addActionListener(e -> saveRequest());
-        addCollectionButton.addActionListener(e -> addCollection());
 
         collectionsPanel = new JPanel(new BorderLayout());
 
-        root = new DefaultMutableTreeNode("Root");
+        root = new DefaultMutableTreeNode("Collections");
         treeModel = new DefaultTreeModel(root);
         folderTree = new JTree(treeModel);
 
         CollectionsTreeMouseListener mouseListener = new CollectionsTreeMouseListener(folderTree, methodComboBox,
-                urlField, headersArea, requestBodyArea,requestDao, saveButton, editButton);
+                urlField, headersArea, requestBodyArea, requestDao, saveButton, editButton, cancelButton, clearButton);
         folderTree.addMouseListener(mouseListener);
 
         JScrollPane folderScrollPane = new JScrollPane(folderTree);
-        collectionsPanel.add(addCollectionButton, BorderLayout.NORTH);
         collectionsPanel.add(folderScrollPane, BorderLayout.CENTER);
     }
 
@@ -98,6 +103,7 @@ public class PostmanClone extends JFrame {
         topPanel.add(urlField);
         topPanel.add(sendButton);
         topPanel.add(saveButton);
+        topPanel.add(clearButton);
         topPanel.add(editButton);
         container.add(topPanel, BorderLayout.NORTH);
 
@@ -128,7 +134,6 @@ public class PostmanClone extends JFrame {
         container.add(collectionsPanel, BorderLayout.WEST);
     }
 
-    //todo: ClientProtocolException handle this
 
     private void editRequest() {
         // Retrieve the selected node from the tree
@@ -194,10 +199,22 @@ public class PostmanClone extends JFrame {
         }
     }
 
+    private void handleCancelEdit() {
+        saveButton.setVisible(true);
+        editButton.setVisible(false);
+        cancelButton.setVisible(false);
+        clearButton.setVisible(true);
+        clearFields();
+    }
+
     private void handleEdit() {
         editButton.setVisible(false);
+        cancelButton.setVisible(false);
+        clearButton.setVisible(false);
         saveButton.setVisible(true);
     }
+
+    //todo: ClientProtocolException handle this
 
     private void sendRequest() {
         String url = urlField.getText();
@@ -281,6 +298,14 @@ public class PostmanClone extends JFrame {
         treeModel.reload(folderNode);
     }
 
+    private void clearFields() {
+        methodComboBox.setSelectedIndex(0);
+        urlField.setText("");
+        headersArea.setText("");
+        requestBodyArea.setText("");
+        // Hide the edit button
+        editButton.setVisible(false);
+    }
     private void loadSavedRequests() {
         addCollection("Recent"); // Add the default "Recent" folder
 
@@ -317,7 +342,4 @@ public class PostmanClone extends JFrame {
 
         return requestNode;
     }
-
-
-
 }

@@ -45,10 +45,10 @@ public class ResponseFormatter {
         if (response.trim().startsWith("{") && response.trim().endsWith("}")) {
             return ResponseFormatter.ContentType.JSON;
         }
-        else if ((response.trim().startsWith("<!DOCTYPE html>") ||
+        else if (((response.trim().startsWith("<!DOCTYPE html>") ||
                 response.trim().startsWith("<html>") ||
-                response.trim().startsWith("<!doctype html>"))
-                && response.trim().endsWith("</html>")) {
+                response.trim().startsWith("<!doctype html>")))
+                && (response.trim().endsWith("</html>") || response.trim().endsWith("</ html>"))) {
             return ResponseFormatter.ContentType.HTML;
         }
         else if (response.trim().startsWith("<") && response.trim().endsWith(">")) {
