@@ -105,14 +105,14 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
                 for (int i = 0; i < selectedNode.getChildCount(); i++) {
                     DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
                     String nodeInfo = childNode.getUserObject().toString();
-                    if (nodeInfo.startsWith("Method: ")) {
-                        method = nodeInfo.substring("Method: ".length()).trim();
-                    } else if (nodeInfo.startsWith("URL: ")) {
-                        url = nodeInfo.substring("URL: ".length()).trim();
-                    } else if (nodeInfo.startsWith("Headers: ")) {
-                        headers = nodeInfo.substring("Headers: ".length()).trim();
-                    } else if (nodeInfo.startsWith("Body: ")) {
-                        body = nodeInfo.substring("Body: ".length()).trim();
+                    if (nodeInfo.startsWith(ViewConstants.HTTP_METHOD_LABEL)) {
+                        method = nodeInfo.substring(ViewConstants.HTTP_METHOD_LABEL.length()).trim();
+                    } else if (nodeInfo.startsWith(ViewConstants.HTTP_URL_LABEL)) {
+                        url = nodeInfo.substring(ViewConstants.HTTP_URL_LABEL.length()).trim();
+                    } else if (nodeInfo.startsWith(ViewConstants.HTTP_HEADERS_LABEL)) {
+                        headers = nodeInfo.substring(ViewConstants.HTTP_HEADERS_LABEL.length()).trim();
+                    } else if (nodeInfo.startsWith(ViewConstants.HTTP_BODY_LABEL)) {
+                        body = nodeInfo.substring(ViewConstants.HTTP_BODY_LABEL.length()).trim();
                     }
                 }
 
@@ -155,8 +155,8 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
                 for (int i = 0; i < selectedNode.getChildCount(); i++) {
                     DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
                     String nodeInfo = childNode.getUserObject().toString();
-                    if (nodeInfo.startsWith("Id: ")) {
-                        id = nodeInfo.substring("Id: ".length()).trim();
+                    if (nodeInfo.startsWith(ViewConstants.HTTP_ID_LABEL)) {
+                        id = nodeInfo.substring(ViewConstants.HTTP_ID_LABEL.length()).trim();
                     }
                 }
 
@@ -189,8 +189,6 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
         popupMenu.add(deleteItem);
 
         popupMenu.show(folderTree, e.getX(), e.getY());
-
-        // Hide the edit button if the "Edit" menu item is not clicked
         editButton.setVisible(false);
     }
 
@@ -200,8 +198,8 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
         for (int i = 0; i < selectedNode.getChildCount(); i++) {
             DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
             String nodeInfo = childNode.getUserObject().toString();
-            if (nodeInfo.startsWith("Id: ")) {
-                requestId = nodeInfo.substring("Id: ".length()).trim();
+            if (nodeInfo.startsWith(ViewConstants.HTTP_ID_LABEL)) {
+                requestId = nodeInfo.substring(ViewConstants.HTTP_ID_LABEL.length()).trim();
                 break;  // Exit loop once ID is found
             }
         }
@@ -209,7 +207,6 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
         if (requestId != null) {
             Request request = requestDao.get(requestId);
             if (request != null) {
-                // Populate UI components with the current request details
                 methodComboBox.setSelectedItem(request.getMethod());
                 urlField.setText(request.getUrl());
                 headersArea.setText(request.getHeaders());

@@ -97,9 +97,9 @@ public class PostmanClone extends JFrame {
         container.setLayout(new BorderLayout());
 
         JPanel topPanel = new JPanel(new FlowLayout());
-        topPanel.add(new JLabel("Method:"));
+        topPanel.add(new JLabel(ViewConstants.HTTP_METHOD_LABEL));
         topPanel.add(methodComboBox);
-        topPanel.add(new JLabel("URL:"));
+        topPanel.add(new JLabel(ViewConstants.HTTP_URL_LABEL));
         topPanel.add(urlField);
         topPanel.add(sendButton);
         topPanel.add(saveButton);
@@ -110,11 +110,11 @@ public class PostmanClone extends JFrame {
         JPanel centerPanel = new JPanel(new BorderLayout());
 
         JPanel headersPanel = new JPanel(new BorderLayout());
-        headersPanel.add(new JLabel("Headers:"), BorderLayout.NORTH);
+        headersPanel.add(new JLabel(ViewConstants.HTTP_HEADERS_LABEL), BorderLayout.NORTH);
         headersPanel.add(new JScrollPane(headersArea), BorderLayout.CENTER);
 
         JPanel requestBodyPanel = new JPanel(new BorderLayout());
-        requestBodyPanel.add(new JLabel("Body:"), BorderLayout.NORTH);
+        requestBodyPanel.add(new JLabel(ViewConstants.HTTP_BODY_LABEL), BorderLayout.NORTH);
         requestBodyPanel.add(new JScrollPane(requestBodyArea), BorderLayout.CENTER);
 
         JPanel requestPanel = new JPanel(new GridLayout(2, 1));
@@ -143,8 +143,8 @@ public class PostmanClone extends JFrame {
             for (int i = 0; i < selectedNode.getChildCount(); i++) {
                 DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
                 String nodeInfo = childNode.getUserObject().toString();
-                if (nodeInfo.startsWith("Id: ")) {
-                    requestId = nodeInfo.substring("Id: ".length()).trim();
+                if (nodeInfo.startsWith(ViewConstants.HTTP_ID_LABEL)) {
+                    requestId = nodeInfo.substring(ViewConstants.HTTP_ID_LABEL.length()).trim();
                     break;
                 }
             }
@@ -164,14 +164,14 @@ public class PostmanClone extends JFrame {
                     for (int i = 0; i < selectedNode.getChildCount(); i++) {
                         DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
                         String nodeInfo = childNode.getUserObject().toString();
-                        if (nodeInfo.startsWith("Method: ")) {
-                            childNode.setUserObject("Method: " + existingRequest.getMethod());
-                        } else if (nodeInfo.startsWith("URL: ")) {
-                            childNode.setUserObject("URL: " + existingRequest.getUrl());
-                        } else if (nodeInfo.startsWith("Headers: ")) {
-                            childNode.setUserObject("Headers: " + existingRequest.getHeaders());
-                        } else if (nodeInfo.startsWith("Body: ")) {
-                            childNode.setUserObject("Body: " + existingRequest.getBody());
+                        if (nodeInfo.startsWith(ViewConstants.HTTP_METHOD_LABEL)) {
+                            childNode.setUserObject(ViewConstants.HTTP_METHOD_LABEL + existingRequest.getMethod());
+                        } else if (nodeInfo.startsWith(ViewConstants.HTTP_URL_LABEL)) {
+                            childNode.setUserObject(ViewConstants.HTTP_URL_LABEL + existingRequest.getUrl());
+                        } else if (nodeInfo.startsWith(ViewConstants.HTTP_HEADERS_LABEL)) {
+                            childNode.setUserObject(ViewConstants.HTTP_HEADERS_LABEL + existingRequest.getHeaders());
+                        } else if (nodeInfo.startsWith(ViewConstants.HTTP_BODY_LABEL)) {
+                            childNode.setUserObject(ViewConstants.HTTP_BODY_LABEL + existingRequest.getBody());
                         }
                     }
 
@@ -270,13 +270,6 @@ public class PostmanClone extends JFrame {
         return folderNode;
     }
 
-    private void addCollection() {
-        String collectionName = JOptionPane.showInputDialog(this, "Enter Collection Name:");
-        if (collectionName != null && !collectionName.isEmpty()) {
-            addCollection(collectionName);
-        }
-    }
-
     private void updateCollectionsTree(String folderName, Request request) {
         DefaultMutableTreeNode folderNode = folderNodeMap.get(folderName);
         if (folderNode == null) {
@@ -295,11 +288,10 @@ public class PostmanClone extends JFrame {
         urlField.setText("");
         headersArea.setText("");
         requestBodyArea.setText("");
-        // Hide the edit button
         editButton.setVisible(false);
     }
     private void loadSavedRequests() {
-        addCollection("Recent"); // Add the default "Recent" folder
+        addCollection("Recent");
 
         List<Request> requests = requestDao.getAll();
         for (Request request : requests) {
@@ -319,11 +311,11 @@ public class PostmanClone extends JFrame {
         DefaultMutableTreeNode requestNode = new DefaultMutableTreeNode(request.getMethod() + ": " + request.getUrl());
 
         // Create child nodes for URL, headers, and body
-        DefaultMutableTreeNode idNode = new DefaultMutableTreeNode("Id: " + request.getId());
-        DefaultMutableTreeNode methodNode = new DefaultMutableTreeNode("Method: " + request.getMethod());
-        DefaultMutableTreeNode urlNode = new DefaultMutableTreeNode("URL: " + request.getUrl());
-        DefaultMutableTreeNode headersNode = new DefaultMutableTreeNode("Headers: " + request.getHeaders());
-        DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode("Body: " + request.getBody());
+        DefaultMutableTreeNode idNode = new DefaultMutableTreeNode(ViewConstants.HTTP_ID_LABEL + request.getId());
+        DefaultMutableTreeNode methodNode = new DefaultMutableTreeNode(ViewConstants.HTTP_METHOD_LABEL + request.getMethod());
+        DefaultMutableTreeNode urlNode = new DefaultMutableTreeNode(ViewConstants.HTTP_URL_LABEL + request.getUrl());
+        DefaultMutableTreeNode headersNode = new DefaultMutableTreeNode(ViewConstants.HTTP_HEADERS_LABEL + request.getHeaders());
+        DefaultMutableTreeNode bodyNode = new DefaultMutableTreeNode(ViewConstants.HTTP_BODY_LABEL + request.getBody());
 
         // Add child nodes to the main request node
         requestNode.add(idNode);
