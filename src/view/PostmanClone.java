@@ -136,38 +136,31 @@ public class PostmanClone extends JFrame {
 
 
     private void editRequest() {
-        // Retrieve the selected node from the tree
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) folderTree.getLastSelectedPathComponent();
 
         if (selectedNode != null) {
-            // Retrieve the ID of the request from the selected node
             String requestId = null;
             for (int i = 0; i < selectedNode.getChildCount(); i++) {
                 DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
                 String nodeInfo = childNode.getUserObject().toString();
                 if (nodeInfo.startsWith("Id: ")) {
                     requestId = nodeInfo.substring("Id: ".length()).trim();
-                    break;  // Exit loop once ID is found
+                    break;
                 }
             }
 
             if (requestId != null) {
-                // Retrieve the existing request from the database
                 Request existingRequest = requestDao.get(requestId);
                 if (existingRequest != null) {
-                    // Update the existing request with UI values
                     existingRequest.setBody(requestBodyArea.getText());
                     existingRequest.setHeaders(headersArea.getText());
                     existingRequest.setMethod((String) methodComboBox.getSelectedItem());
                     existingRequest.setUrl(urlField.getText());
 
-                    // Save the updated request to the database
                     requestDao.update(existingRequest);
 
-                    // Update the tree node with the new values
                     selectedNode.setUserObject(existingRequest.getMethod() + ": " + existingRequest.getUrl());
 
-                    // Update the child nodes with the new values
                     for (int i = 0; i < selectedNode.getChildCount(); i++) {
                         DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
                         String nodeInfo = childNode.getUserObject().toString();
@@ -182,7 +175,6 @@ public class PostmanClone extends JFrame {
                         }
                     }
 
-                    // Reload the tree model to reflect the changes
                     treeModel.reload(selectedNode);
 
                     JOptionPane.showMessageDialog(folderTree, "Request updated successfully!");
@@ -210,7 +202,7 @@ public class PostmanClone extends JFrame {
     private void handleEdit() {
         editButton.setVisible(false);
         cancelButton.setVisible(false);
-        clearButton.setVisible(false);
+        clearButton.setVisible(true);
         saveButton.setVisible(true);
     }
 

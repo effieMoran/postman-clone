@@ -42,6 +42,7 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
         this.clearButton = clearButton;
     }
 
+
     @Override
     public void mouseClicked(MouseEvent e) {
         if (SwingUtilities.isRightMouseButton(e)) {
@@ -61,9 +62,8 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
                     if (hasLeafChildren) {
                         // Display a popup menu with the option to fill the components
                         showPopupMenu(e, selectedNode);
-
-                        // Show the edit button when a request node is selected
-                        editButton.setVisible(true);
+                    } else {
+                        editButton.setVisible(false); // Hide the edit button if a folder with leaf children is not selected
                     }
                 }
             }
@@ -84,6 +84,7 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
                     if (!hasLeafChildren) {
                         // Do nothing for folder nodes one level above leaf nodes
                         folderTree.clearSelection();
+                        editButton.setVisible(false); // Hide the edit button when clicking on a folder node
                     }
                 }
             }
@@ -188,6 +189,9 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
         popupMenu.add(deleteItem);
 
         popupMenu.show(folderTree, e.getX(), e.getY());
+
+        // Hide the edit button if the "Edit" menu item is not clicked
+        editButton.setVisible(false);
     }
 
     private void editNode(DefaultMutableTreeNode selectedNode) {
