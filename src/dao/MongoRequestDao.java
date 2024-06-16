@@ -7,10 +7,8 @@ import model.Request;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class MongoRequestDao implements Dao<Request> {
     private static final String METHOD = "method";

@@ -82,9 +82,8 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
                         }
                     }
                     if (!hasLeafChildren) {
-                        // Do nothing for folder nodes one level above leaf nodes
                         folderTree.clearSelection();
-                        editButton.setVisible(false); // Hide the edit button when clicking on a folder node
+                        editButton.setVisible(false);
                     }
                 }
             }
@@ -95,101 +94,103 @@ public class CollectionsTreeMouseListener extends MouseAdapter {
         JPopupMenu popupMenu = new JPopupMenu();
 
         JMenuItem fillComponentsItem = new JMenuItem("Load");
-        fillComponentsItem.addActionListener(actionEvent -> {
-            if (selectedNode != null) {
-                // Retrieve request details from the child node
-                String method = null;
-                String url = null;
-                String headers = null;
-                String body = null;
-                for (int i = 0; i < selectedNode.getChildCount(); i++) {
-                    DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
-                    String nodeInfo = childNode.getUserObject().toString();
-                    if (nodeInfo.startsWith(ViewConstants.HTTP_METHOD_LABEL)) {
-                        method = nodeInfo.substring(ViewConstants.HTTP_METHOD_LABEL.length()).trim();
-                    } else if (nodeInfo.startsWith(ViewConstants.HTTP_URL_LABEL)) {
-                        url = nodeInfo.substring(ViewConstants.HTTP_URL_LABEL.length()).trim();
-                    } else if (nodeInfo.startsWith(ViewConstants.HTTP_HEADERS_LABEL)) {
-                        headers = nodeInfo.substring(ViewConstants.HTTP_HEADERS_LABEL.length()).trim();
-                    } else if (nodeInfo.startsWith(ViewConstants.HTTP_BODY_LABEL)) {
-                        body = nodeInfo.substring(ViewConstants.HTTP_BODY_LABEL.length()).trim();
-                    }
-                }
-
-                // Populate UI components with retrieved request details
-                if (method != null) {
-                    methodComboBox.setSelectedItem(method);
-                }
-                if (url != null) {
-                    urlField.setText(url);
-                }
-                if (headers != null) {
-                    headersArea.setText(headers);
-                }
-                if (body != null) {
-                    requestBodyArea.setText(body);
-                }
-            }
-        });
+        fillComponentsItem.addActionListener(actionEvent -> loadSelectedItem(selectedNode));
         popupMenu.add(fillComponentsItem);
 
         JMenuItem editItem = new JMenuItem("Edit");
-        editItem.addActionListener(actionEvent -> {
-            if (selectedNode != null) {
-                folderTree.setSelectionPath(new TreePath(selectedNode.getPath()));
-                saveButton.setVisible(false);
-                editButton.setVisible(true);
-                cancelButton.setVisible(true);
-                clearButton.setVisible(true);
-
-                editNode(selectedNode);
-            }
-        });
+        editItem.addActionListener(actionEvent -> editSelectedItem(selectedNode));
         popupMenu.add(editItem);
 
         JMenuItem deleteItem = new JMenuItem("Delete");
-        deleteItem.addActionListener(actionEvent -> {
-            if (selectedNode != null) {
-                String id = null;
-
-                for (int i = 0; i < selectedNode.getChildCount(); i++) {
-                    DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
-                    String nodeInfo = childNode.getUserObject().toString();
-                    if (nodeInfo.startsWith(ViewConstants.HTTP_ID_LABEL)) {
-                        id = nodeInfo.substring(ViewConstants.HTTP_ID_LABEL.length()).trim();
-                    }
-                }
-
-                if (id != null && !id.isEmpty()) {
-                    try {
-                        // Delete the request from the database
-                        requestDao.delete(id);
-
-                        // Remove the node from the tree
-                        DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
-                        if (parentNode != null) {
-                            parentNode.remove(selectedNode);
-                            ((DefaultTreeModel) folderTree.getModel()).reload(parentNode);
-                        } else {
-                            DefaultTreeModel model = (DefaultTreeModel) folderTree.getModel();
-                            model.setRoot(null); // or model.removeNodeFromParent(selectedNode);
-                        }
-
-                        JOptionPane.showMessageDialog(folderTree, "Request Deleted!");
-                    } catch (NumberFormatException e1) {
-                        // Handle parsing exception (e.g., invalid ID format)
-                        e1.printStackTrace();
-                        JOptionPane.showMessageDialog(folderTree, "Invalid ID format: " + id, "Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(folderTree, "ID not found in node", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
+        deleteItem.addActionListener(actionEvent -> deleteSelectedItem(selectedNode));
         popupMenu.add(deleteItem);
 
         popupMenu.show(folderTree, e.getX(), e.getY());
         editButton.setVisible(false);
+    }
+
+    private void editSelectedItem(DefaultMutableTreeNode selectedNode) {
+        if (selectedNode != null) {
+            folderTree.setSelectionPath(new TreePath(selectedNode.getPath()));
+            saveButton.setVisible(false);
+            editButton.setVisible(true);
+            cancelButton.setVisible(true);
+            clearButton.setVisible(true);
+
+            editNode(selectedNode);
+        }
+    }
+
+    private void loadSelectedItem(DefaultMutableTreeNode selectedNode) {
+        if (selectedNode != null) {
+            String method = null;
+            String url = null;
+            String headers = null;
+            String body = null;
+            for (int i = 0; i < selectedNode.getChildCount(); i++) {
+                DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
+                String nodeInfo = childNode.getUserObject().toString();
+                if (nodeInfo.startsWith(ViewConstants.HTTP_METHOD_LABEL)) {
+                    method = nodeInfo.substring(ViewConstants.HTTP_METHOD_LABEL.length()).trim();
+                } else if (nodeInfo.startsWith(ViewConstants.HTTP_URL_LABEL)) {
+                    url = nodeInfo.substring(ViewConstants.HTTP_URL_LABEL.length()).trim();
+                } else if (nodeInfo.startsWith(ViewConstants.HTTP_HEADERS_LABEL)) {
+                    headers = nodeInfo.substring(ViewConstants.HTTP_HEADERS_LABEL.length()).trim();
+                } else if (nodeInfo.startsWith(ViewConstants.HTTP_BODY_LABEL)) {
+                    body = nodeInfo.substring(ViewConstants.HTTP_BODY_LABEL.length()).trim();
+                }
+            }
+
+            if (method != null) {
+                methodComboBox.setSelectedItem(method);
+            }
+            if (url != null) {
+                urlField.setText(url);
+            }
+            if (headers != null) {
+                headersArea.setText(headers);
+            }
+            if (body != null) {
+                requestBodyArea.setText(body);
+            }
+        }
+    }
+
+    private void deleteSelectedItem(DefaultMutableTreeNode selectedNode) {
+        if (selectedNode != null) {
+            String id = null;
+
+            for (int i = 0; i < selectedNode.getChildCount(); i++) {
+                DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) selectedNode.getChildAt(i);
+                String nodeInfo = childNode.getUserObject().toString();
+                if (nodeInfo.startsWith(ViewConstants.HTTP_ID_LABEL)) {
+                    id = nodeInfo.substring(ViewConstants.HTTP_ID_LABEL.length()).trim();
+                }
+            }
+
+            if (id != null && !id.isEmpty()) {
+                try {
+                    requestDao.delete(id);
+
+                    DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
+                    if (parentNode != null) {
+                        parentNode.remove(selectedNode);
+                        ((DefaultTreeModel) folderTree.getModel()).reload(parentNode);
+                    } else {
+                        DefaultTreeModel model = (DefaultTreeModel) folderTree.getModel();
+                        model.setRoot(null);
+                    }
+
+                    JOptionPane.showMessageDialog(folderTree, "Request Deleted!");
+                } catch (NumberFormatException e1) {
+                    // Handle parsing exception (e.g., invalid ID format)
+                    e1.printStackTrace();
+                    JOptionPane.showMessageDialog(folderTree, "Invalid ID format: " + id, "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(folderTree, "ID not found in node", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     private void editNode(DefaultMutableTreeNode selectedNode) {
